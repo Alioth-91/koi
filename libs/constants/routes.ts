@@ -1,12 +1,16 @@
-export interface Route {
-  name: string;
-  link: string;
-}
+import { Route } from "next";
 
-export const Routes: Route[] = [
-  { name: "대시보드", link: "/" },
-  { name: "기록", link: "/record" },
-  { name: "원두", link: "/bean" },
-  { name: "레시피", link: "/recipe" },
-  { name: "설정", link: "/setting" },
+export type NavItem<T extends string = string> = {
+  label: string;
+  disabled?: boolean;
+  href: T;
+};
+
+export const navItems: NavItem<Route>[] = [
+  { label: "대시보드", href: "/" },
+  { label: "기록", href: "/brews" },
+  { label: "원두", href: "/beans" },
+  { label: "레시피", href: "/recipes" },
+  { label: "커뮤니티", disabled: true, href: "/community" },
+  { label: "설정", href: "/settings" },
 ];
