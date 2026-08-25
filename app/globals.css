@@ -23,6 +23,12 @@
   --aftertaste: #8b5cf6; /* 여운 — violet */
   --aftertaste-deep: #6d28d9;
 
+  /* 기록 유형 배지 */
+  --badge-home: #601d49;
+  --badge-home-foreground: #ffffff;
+  --badge-cafe: #ffebb8;
+  --badge-cafe-foreground: #601d49; /* 흰색은 대비 1.2:1이라 안 읽힌다 */
+
   /* Primary — 채움과 강조는 전부 이 한 갈래 */
   --primary: #18181b; /* 저장/추가 버튼, 초점, 선택 칩 */
   --primary-hover: #27272a; /* hover · pressed */
@@ -62,6 +68,11 @@
   --color-body-deep: var(--body-deep);
   --color-aftertaste: var(--aftertaste);
   --color-aftertaste-deep: var(--aftertaste-deep);
+
+  --color-badge-home: var(--badge-home);
+  --color-badge-home-foreground: var(--badge-home-foreground);
+  --color-badge-cafe: var(--badge-cafe);
+  --color-badge-cafe-foreground: var(--badge-cafe-foreground);
 
   --color-primary: var(--primary);
   --color-primary-hover: var(--primary-hover);
