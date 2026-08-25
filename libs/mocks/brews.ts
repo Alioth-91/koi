@@ -1,0 +1,97 @@
+import { Brew } from "@/types/brew";
+
+// 진짜 데이터가 붙으면 이 파일은 지운다.
+export const brews: Brew[] = [
+  {
+    id: "1",
+    type: "home",
+    date: "2026-08-25",
+    score: 4.5,
+    beanName: "에티오피아 예가체프",
+    method: "핸드드립",
+    dose: 20,
+    water: 320,
+    time: "2:30",
+    memo: "물 온도를 2도 낮췄더니 산미가 훨씬 또렷해졌다.\n다음엔 92도로.",
+    sensory: {
+      acidity: 5,
+      sweetness: 4,
+      bitterness: 2,
+      body: 3,
+      aftertaste: 4,
+    },
+  },
+  {
+    id: "2",
+    type: "home",
+    date: "2026-08-24",
+    score: 3.5,
+    beanName: "콜롬비아 수프리모",
+    method: "에어로프레스",
+    time: "1:45",
+    sensory: {
+      acidity: 2,
+      sweetness: 3,
+      bitterness: 4,
+      body: 4,
+      aftertaste: 2,
+    },
+  },
+  {
+    id: "3",
+    type: "home",
+    date: "2026-08-22",
+    score: 4,
+    beanName: "케냐 AA",
+    method: "프렌치프레스",
+    dose: 18,
+    sensory: {
+      acidity: 4,
+      sweetness: 3,
+      bitterness: 3,
+      body: 5,
+      aftertaste: 3,
+    },
+  },
+  {
+    // 맛을 아예 안 넣은 기록 — 상세에서 맛 섹션이 통째로 빈다
+    id: "4",
+    type: "home",
+    date: "2026-08-19",
+    score: 2.5,
+    beanName: "블렌드 하우스",
+    memo: "정신없이 내려서 아무것도 못 적었다. 맛도 그저 그랬음.",
+  },
+  {
+    id: "5",
+    type: "cafe",
+    date: "2026-08-17",
+    score: 5,
+    cafeName: "프릳츠 도화점",
+    location: { lat: 37.5407, lng: 126.9502 },
+    menu: "아메리카노",
+    temperature: "hot",
+    price: 5000,
+    sensory: {
+      acidity: 4,
+      sweetness: 5,
+      bitterness: 2,
+      body: 4,
+      aftertaste: 5,
+    },
+  },
+  {
+    // 일부 축만 넣은 기록 — 명세의 "미입력 축은 저장하지 않는다"
+    id: "6",
+    type: "cafe",
+    date: "2026-08-14",
+    score: 3,
+    cafeName: "이름 없는 동네 카페",
+    location: { lat: 37.5563, lng: 126.9236 },
+    memo: "간판이 없어서 두 번 지나쳤다.",
+    sensory: {
+      acidity: 2,
+      bitterness: 4,
+    },
+  },
+];
