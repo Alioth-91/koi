@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { navItems } from "@/libs/constants/routes";
+import { isActiveNav, navItems } from "@/libs/constants/routes";
 import { cn } from "@/libs/utils";
 
 export default function BottomTab() {
@@ -17,18 +17,26 @@ export default function BottomTab() {
       <ul className="flex flex-1 py-4">
         {navItems
           .filter((item) => !item.disabled)
-          .map((item) => (
-            <li
-              className={cn(
-                "w-full rounded-xl text-center text-[11px] font-semibold text-subtle-foreground",
-                pathName === item.href &&
-                  "font-extrabold underline underline-offset-2",
-              )}
-              key={item.href}
-            >
-              <Link href={item.href}>{item.label}</Link>
-            </li>
-          ))}
+          .map((item) => {
+            const isActive = isActiveNav(pathName, item.href);
+
+            return (
+              <li
+                className={cn(
+                  "w-full rounded-xl text-center text-[11px] font-semibold text-subtle-foreground",
+                  isActive && "font-extrabold underline underline-offset-2",
+                )}
+                key={item.href}
+              >
+                <Link
+                  aria-current={isActive ? "page" : undefined}
+                  href={item.href}
+                >
+                  {item.label}
+                </Link>
+              </li>
+            );
+          })}
       </ul>
     </nav>
   );
