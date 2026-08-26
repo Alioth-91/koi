@@ -1,10 +1,12 @@
 import Link from "next/link";
 
+import BrewList from "@/components/brews/brew-list";
+import BrewPanes from "@/components/brews/brew-panes";
 import { brews } from "@/libs/mocks/brews";
 
-export default function BrewsLayout({ children, detail }: LayoutProps<"/brews">) {
+export default function BrewsLayout({ children }: LayoutProps<"/brews">) {
   return (
-    <main className="flex min-w-0 flex-1 flex-col">
+    <main className="flex min-h-0 min-w-0 flex-1 flex-col">
       <header className="flex w-full items-center justify-between border-b border-border-foreground px-4 py-2">
         <div>
           <div className="font-archivo text-xs text-muted-foreground">
@@ -22,11 +24,8 @@ export default function BrewsLayout({ children, detail }: LayoutProps<"/brews">)
         </Link>
       </header>
 
-      <div className="grid min-h-0 flex-1 grid-cols-[1fr_1.15fr]">
-        {children}
-
-        <div className="min-h-0 overflow-y-auto">{detail}</div>
-      </div>
+      {/* 목록은 레이아웃에 둔다 — 하위 라우트가 바뀌어도 다시 그려지지 않는다. */}
+      <BrewPanes list={<BrewList brews={brews} />} detail={children} />
     </main>
   );
 }

@@ -1,6 +1,5 @@
-import BrewList from "@/components/brews/brew-list";
-import { brews } from "@/libs/mocks/brews";
-
 export default function BrewsPage() {
-  return <BrewList brews={brews} />;
+  return (
+    <p className="p-6 text-muted-foreground">왼쪽에서 기록을 골라주세요.</p>
+  );
 }
