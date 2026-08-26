@@ -13,8 +13,25 @@ type Props = {
 export default function BrewList({ brews }: Props) {
   const pathName = usePathname();
 
+  if (!brews.length) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-3 border-r border-border-foreground p-6 text-center">
+        <p className="text-muted-foreground">아직 기록이 없어요</p>
+
+        <Link
+          href="/brews/new"
+          className="rounded-xl bg-primary px-3 py-2 text-sm font-bold text-primary-foreground transition-colors hover:bg-primary-hover"
+        >
+          첫 기록 추가하기
+        </Link>
+      </div>
+    );
+  }
+
+  // relative — 안쪽 sr-only(position:absolute)의 기준을 이 <ul>로 만든다.
+  // 없으면 기준이 문서가 되어 스크롤 컨테이너 밖으로 삐져나가고, 페이지에 세로 스크롤이 생긴다.
   return (
-    <ul className="flex min-h-0 flex-col gap-2 overflow-y-auto border-r border-border-foreground p-3">
+    <ul className="relative flex min-h-0 flex-col gap-2 overflow-y-auto border-r border-border-foreground p-3">
       {brews.map((brew) => (
         <li key={brew.id}>
           <Link
