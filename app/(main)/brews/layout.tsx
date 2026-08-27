@@ -17,7 +17,7 @@ export default function BrewsLayout({ children }: LayoutProps<"/brews">) {
         </div>
 
         <Link
-          href="/brews/new"
+          href="?form=brew"
           className="rounded-xl bg-primary px-3 py-2 text-sm font-bold text-primary-foreground transition-colors hover:bg-primary-hover"
         >
           기록 추가

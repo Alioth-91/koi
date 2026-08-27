@@ -17,7 +17,7 @@ type Props = {
  * md 이상은 2단, 미만은 한 번에 한 칸
  */
 export default function BrewPanes({ list, detail }: Props) {
-  // /brews면 목록만, /brews/1 · /brews/new면 상세만 (md 미만에서).
+  // /brews면 목록만, /brews/1이면 상세만 (md 미만에서).
   const hasDetail = usePathname() !== "/brews";
 
   return (

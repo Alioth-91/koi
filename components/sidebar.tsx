@@ -26,16 +26,15 @@ export default function Sidebar() {
             const isActive = isActiveNav(pathName, item.href);
 
             return (
-              <li
-                className={cn(
-                  "w-full rounded-xl font-semibold text-foreground transition hover:bg-primary-tint md:py-2.5 md:text-center xl:px-4 xl:py-3 xl:text-left",
-                  isActive &&
-                    "bg-foreground text-primary-foreground hover:bg-primary-hover",
-                )}
-                key={item.href}
-              >
+              <li key={item.href}>
+                {/* 여백·배경을 <a>에 둔다 — <li>에 두면 글자만 눌린다. */}
                 <Link
                   aria-current={isActive ? "page" : undefined}
+                  className={cn(
+                    "block w-full rounded-xl font-semibold text-foreground transition hover:bg-primary-tint md:py-2.5 md:text-center xl:px-4 xl:py-3 xl:text-left",
+                    isActive &&
+                      "bg-foreground text-primary-foreground hover:bg-primary-hover",
+                  )}
                   href={item.href}
                 >
                   {item.label}
@@ -44,8 +43,13 @@ export default function Sidebar() {
             );
           })}
 
-        <li className="w-full rounded-xl bg-primary py-3.5 text-center font-extrabold text-primary-foreground transition hover:bg-primary-hover md:mt-5">
-          <Link href="/brews/new">기록 추가</Link>
+        <li className="md:mt-5">
+          <Link
+            className="block w-full rounded-xl bg-primary py-3.5 text-center font-extrabold text-primary-foreground transition hover:bg-primary-hover"
+            href="?form=brew"
+          >
+            기록 추가
+          </Link>
         </li>
       </ul>
     </nav>

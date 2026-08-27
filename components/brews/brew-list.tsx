@@ -19,7 +19,7 @@ export default function BrewList({ brews }: Props) {
         <p className="text-muted-foreground">아직 기록이 없어요</p>
 
         <Link
-          href="/brews/new"
+          href="?form=brew"
           className="rounded-xl bg-primary px-3 py-2 text-sm font-bold text-primary-foreground transition-colors hover:bg-primary-hover"
         >
           첫 기록 추가하기
