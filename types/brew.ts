@@ -23,6 +23,7 @@ export type HomeBrew = BrewBase & {
   time?: string;
   type: "home";
   water?: number;
+  waterTemp?: number; // 물 온도(℃). 카페의 temperature(hot/iced)와는 다른 값
 };
 
 export type CafeBrew = BrewBase & {
