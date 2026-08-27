@@ -31,7 +31,7 @@
 
   /* Primary — 채움과 강조는 전부 이 한 갈래 */
   --primary: #18181b; /* 저장/추가 버튼, 초점, 선택 칩 */
-  --primary-hover: #27272a; /* hover · pressed */
+  --primary-hover: #6c6c6d; /* hover · pressed */
   --primary-foreground: #fafafa; /* primary 면 위 텍스트 */
   --primary-muted: #3f3f46; /* primary 면 위 보조 텍스트 */
   --primary-tint: #f4f4f5; /* 옅은 강조 배경 */
