@@ -3,15 +3,22 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { cn, formatDate } from "@/libs/utils";
+import { cn, formatDate, formatScore } from "@/libs/utils";
 import { Brew } from "@/types/brew";
+import { useEffect, useRef } from "react";
 
 type Props = {
   brews: Brew[];
 };
 
 export default function BrewList({ brews }: Props) {
+  const activeAnchorRef = useRef<HTMLAnchorElement>(null);
+
   const pathName = usePathname();
+
+  useEffect(() => {
+    activeAnchorRef.current?.scrollIntoView({ block: "center" });
+  }, [pathName]);
 
   if (!brews.length) {
     return (
@@ -32,40 +39,47 @@ export default function BrewList({ brews }: Props) {
   // 없으면 기준이 문서가 되어 스크롤 컨테이너 밖으로 삐져나가고, 페이지에 세로 스크롤이 생긴다.
   return (
     <ul className="relative flex min-h-0 flex-col gap-2 overflow-y-auto border-r border-border-foreground p-3">
-      {brews.map((brew) => (
-        <li key={brew.id}>
-          <Link
-            aria-current={pathName === `/brews/${brew.id}` ? "page" : undefined}
-            href={`/brews/${brew.id}`}
-            className={cn(
-              "flex items-center gap-3 rounded-2xl px-3.5 py-3 transition hover:bg-primary-tint",
-              pathName === `/brews/${brew.id}` && "bg-primary-tint",
-            )}
-          >
-            <span className="min-w-0 flex-1">
-              <time
-                dateTime={brew.date}
-                className="block text-[11px] text-muted-foreground"
-              >
-                {formatDate(brew.date)}
-              </time>
+      {brews.map((brew) => {
+        const isActive = pathName === `/brews/${brew.id}`;
 
-              <span className="mt-0.5 block truncate font-bold">
-                {brew.type === "home" ? brew.beanName : brew.cafeName}
+        return (
+          <li key={brew.id}>
+            <Link
+              aria-current={
+                pathName === `/brews/${brew.id}` ? "page" : undefined
+              }
+              href={`/brews/${brew.id}`}
+              className={cn(
+                "flex items-center gap-3 rounded-2xl px-3.5 py-3 transition hover:bg-primary-tint focus-visible:ring-2 focus-visible:ring-foreground focus-visible:outline-hidden",
+                pathName === `/brews/${brew.id}` && "bg-primary-tint",
+              )}
+              ref={isActive ? activeAnchorRef : undefined}
+            >
+              <span className="min-w-0 flex-1">
+                <time
+                  dateTime={brew.date}
+                  className="block text-[11px] text-muted-foreground"
+                >
+                  {formatDate(brew.date)}
+                </time>
+
+                <span className="mt-0.5 block truncate font-bold">
+                  {brew.type === "home" ? brew.beanName : brew.cafeName}
+                </span>
+
+                <span className="mt-0.5 block min-h-4 truncate text-xs text-subtle-foreground">
+                  {summarize(brew)}
+                </span>
               </span>
 
-              <span className="mt-0.5 block min-h-4 truncate text-xs text-subtle-foreground">
-                {summarize(brew)}
+              <span className="font-archivo text-2xl font-extrabold">
+                <span className="sr-only">총점 </span>
+                {formatScore(brew.score)}
               </span>
-            </span>
-
-            <span className="font-archivo text-2xl font-extrabold">
-              <span className="sr-only">총점 </span>
-              {brew.score}
-            </span>
-          </Link>
-        </li>
-      ))}
+            </Link>
+          </li>
+        );
+      })}
     </ul>
   );
 }
