@@ -44,6 +44,16 @@ declare global {
         }) => KakaoMarker;
         // autoload=false 로 받았을 때 SDK를 실제로 켜는 함수.
         load: (callback: () => void) => void;
+        // 이름은 static이지만 이미지 주소가 아니라 element 안에 그려주는 지도다.
+        // 만들고 나면 조작할 것이 없어서 돌려받는 값을 쓰지 않는다.
+        StaticMap: new (
+          element: HTMLElement,
+          options: {
+            center: KakaoLatLng;
+            level: number;
+            marker: { position: KakaoLatLng };
+          },
+        ) => unknown;
         // libraries=services 로 함께 받아온 것. 서버 없이 브라우저에서 장소를 찾는다.
         services: {
           Places: new () => {

@@ -1,4 +1,5 @@
-import { cn, formatDate } from "@/libs/utils";
+import CafeStaticMap from "@/components/brews/cafe-static-map";
+import { cn, formatDate, formatScore } from "@/libs/utils";
 import { Brew } from "@/types/brew";
 
 const SENSORY = [
@@ -21,7 +22,7 @@ export default function BrewDetail({ brew }: { brew: Brew }) {
       <header>
         <span
           className={cn(
-            "rounded-full px-2.5 py-1 font-archivo text-[10.5px] font-extrabold",
+            "rounded-full px-2.5 py-1 text-[10.5px] font-extrabold",
             brew.type === "home"
               ? "bg-badge-home text-badge-home-foreground"
               : "bg-badge-cafe text-badge-cafe-foreground",
@@ -92,18 +93,13 @@ export default function BrewDetail({ brew }: { brew: Brew }) {
       )}
 
       {brew.type === "cafe" && brew.location && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={staticMapUrl(brew.location)}
-          alt={`${brew.cafeName} 위치`}
-          className="aspect-3/1 w-full rounded-2xl object-cover"
-        />
+        <CafeStaticMap cafeName={brew.cafeName} location={brew.location} />
       )}
 
       <p className="flex items-baseline justify-between rounded-2xl bg-primary px-5 py-4 text-primary-foreground">
         <span className="text-[11px] tracking-widest opacity-85">총점</span>
         <span className="font-archivo text-3xl font-extrabold">
-          {brew.score}
+          {formatScore(brew.score)}
         </span>
       </p>
     </article>
@@ -135,23 +131,4 @@ function ratioOf(dose?: number, water?: number) {
   if (!dose || !water) return undefined;
 
   return `1:${(water / dose).toFixed(1).replace(/\.0$/, "")}`;
-}
-
-/**
- * 네이버 정적 지도 이미지 주소.
- *
- * next/image를 쓰지 않는다 — 서버가 대신 받아오면 Referer가 없어서 인증이 막힌다.
- */
-function staticMapUrl({ lat, lng }: { lat: number; lng: number }) {
-  const params = new URLSearchParams({
-    w: "560",
-    h: "373",
-    center: `${lng},${lat}`,
-    level: "16",
-    scale: "2",
-    markers: `type:d|size:mid|pos:${lng} ${lat}`,
-    "X-NCP-APIGW-API-KEY-ID": process.env.NEXT_PUBLIC_NCP_CLIENT_ID ?? "",
-  });
-
-  return `https://maps.apigw.ntruss.com/map-static/v2/raster-cors?${params}`;
 }
