@@ -3,6 +3,25 @@ import { Brew } from "@/types/brew";
 // 진짜 데이터가 붙으면 이 파일은 지운다.
 export const brews: Brew[] = [
   {
+    id: "17",
+    type: "home",
+    date: "2026-08-27",
+    score: 4,
+    beanName: "에티오피아 예가체프",
+    method: "핸드드립",
+    dose: 18,
+    water: 290,
+    time: "2:20",
+    memo: "92도로 낮춰봤다. 산미는 얌전해지고 단맛이 올라온다.",
+    sensory: {
+      acidity: 4,
+      sweetness: 5,
+      bitterness: 2,
+      body: 3,
+      aftertaste: 4,
+    },
+  },
+  {
     id: "1",
     type: "home",
     date: "2026-08-25",
@@ -54,6 +73,35 @@ export const brews: Brew[] = [
     },
   },
   {
+    id: "18",
+    type: "home",
+    date: "2026-08-21",
+    score: 5,
+    beanName: "에티오피아 예가체프",
+    method: "핸드드립",
+    dose: 21,
+    water: 330,
+    time: "2:45",
+    sensory: {
+      acidity: 5,
+      sweetness: 5,
+      bitterness: 1,
+      body: 3,
+      aftertaste: 5,
+    },
+  },
+  {
+    // 도스를 안 적은 두 번째 기록 — 잔량이 실제보다 많게 나오는 걸 보여준다
+    id: "19",
+    type: "home",
+    date: "2026-08-20",
+    score: 4,
+    beanName: "콜롬비아 수프리모",
+    method: "에어로프레스",
+    time: "1:50",
+    sensory: { sweetness: 4, bitterness: 3, body: 4 },
+  },
+  {
     // 맛을 아예 안 넣은 기록 — 상세에서 맛 섹션이 통째로 빈다
     id: "4",
     type: "home",
@@ -79,6 +127,19 @@ export const brews: Brew[] = [
       body: 4,
       aftertaste: 5,
     },
+  },
+  {
+    id: "20",
+    type: "home",
+    date: "2026-08-16",
+    score: 3.5,
+    beanName: "케냐 AA",
+    method: "핸드드립",
+    dose: 17,
+    water: 260,
+    time: "2:10",
+    memo: "분쇄도를 두 클릭 굵게. 쓴맛이 덜하다.",
+    sensory: { acidity: 4, sweetness: 3, bitterness: 2, body: 4 },
   },
   {
     id: "6",
