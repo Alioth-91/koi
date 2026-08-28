@@ -26,3 +26,11 @@ export function today() {
 
   return `${now.getFullYear()}-${month}-${day}`;
 }
+
+/**
+ * 0.5 단위라 소수 한 자리로 고정한다. 정수 점수도 "4"가 아니라 "4.0"으로
+ * 나와야 목록에서 자릿수가 흔들리지 않는다.
+ */
+export function formatScore(score: number) {
+  return score.toFixed(1);
+}

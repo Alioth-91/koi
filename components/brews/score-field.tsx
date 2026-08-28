@@ -1,5 +1,7 @@
 import type { ComponentProps } from "react";
 
+import { formatScore } from "@/libs/utils";
+
 type Props = ComponentProps<"input"> & {
   value: number;
 };
@@ -20,7 +22,9 @@ export default function ScoreField({ value, ...input }: Props) {
           총점
         </span>
 
-        <span className="font-archivo text-[22px] font-extrabold">{value}</span>
+        <span className="font-archivo text-[22px] font-extrabold">
+          {formatScore(value)}
+        </span>
       </span>
 
       <input
