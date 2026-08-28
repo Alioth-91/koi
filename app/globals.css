@@ -23,6 +23,16 @@
   --aftertaste: #8b5cf6; /* 여운 — violet */
   --aftertaste-deep: #6d28d9;
 
+  /* 가공 방식 배지 */
+  --process-washed: #e0f2fe;
+  --process-washed-foreground: #075985;
+  --process-natural: #ffe4e6;
+  --process-natural-foreground: #9f1239;
+  --process-honey: #fef3c7;
+  --process-honey-foreground: #92400e;
+  --process-anaerobic: #fae8ff;
+  --process-anaerobic-foreground: #701a75;
+
   /* 기록 유형 배지 */
   --badge-home: #601d49;
   --badge-home-foreground: #ffffff;
@@ -73,6 +83,15 @@
   --color-badge-home-foreground: var(--badge-home-foreground);
   --color-badge-cafe: var(--badge-cafe);
   --color-badge-cafe-foreground: var(--badge-cafe-foreground);
+
+  --color-process-washed: var(--process-washed);
+  --color-process-washed-foreground: var(--process-washed-foreground);
+  --color-process-natural: var(--process-natural);
+  --color-process-natural-foreground: var(--process-natural-foreground);
+  --color-process-honey: var(--process-honey);
+  --color-process-honey-foreground: var(--process-honey-foreground);
+  --color-process-anaerobic: var(--process-anaerobic);
+  --color-process-anaerobic-foreground: var(--process-anaerobic-foreground);
 
   --color-primary: var(--primary);
   --color-primary-hover: var(--primary-hover);
