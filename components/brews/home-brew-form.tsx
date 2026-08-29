@@ -9,7 +9,7 @@ import MemoField from "@/components/brews/memo-field";
 import ScoreField from "@/components/brews/score-field";
 import SensoryFields from "@/components/brews/sensory-fields";
 import TypeSegment from "@/components/brews/type-segment";
-import { BREW_FORM_ID } from "@/libs/constants/forms";
+import { BREW_NEW_FORM_ID } from "@/libs/constants/forms";
 import { today } from "@/libs/utils";
 import { homeSchema } from "@/libs/schemas/brew";
 import type { Brew } from "@/types/brew";
@@ -49,7 +49,7 @@ export default function HomeBrewForm({ onTypeChange }: Props) {
       // flex-1 — 모달 높이가 h-4/5로 고정이라, 폼이 남는 높이를 채워야
       // 우측 패널의 세로 구분선이 바닥까지 이어진다.
       className="flex-1 md:grid md:grid-cols-[1fr_1fr]"
-      id={BREW_FORM_ID}
+      id={BREW_NEW_FORM_ID}
       onSubmit={handleSubmit((values) => console.log(values))}
     >
       <div className="flex min-w-0 flex-col gap-2.5 p-6">

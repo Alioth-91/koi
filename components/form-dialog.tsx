@@ -4,20 +4,53 @@ import type { Route } from "next";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef } from "react";
 
+import NewBeanForm from "@/components/beans/new-bean-form";
 import NewBrewForm from "@/components/brews/new-brew-form";
-import { BREW_FORM_ID } from "@/libs/constants/forms";
+import { BEAN_NEW_FORM_ID, BREW_NEW_FORM_ID } from "@/libs/constants/forms";
+import { cn } from "@/libs/utils";
 
 /**
- * 기록 추가 레이어
+ * 폼 모달
  *
- * 열림/닫힘은 주소(`?form=brew`)가 들고 있다. 전역 상태가 없어도 사이드바·헤더·목록
- * 어디서 열든 같은 곳을 본다.
- *
- * 레이아웃은 searchParams를 못 읽는다(내비게이션 때 다시 렌더되지 않아 값이 낡는다).
- * 그래서 여기서 클라이언트로 내려와 useSearchParams로 읽는다.
+ * 열림/닫힘은 쿼리스트링(`?form=brew`)으로 관리한다.
  */
-export default function NewBrewDialog() {
-  const isOpen = useSearchParams().get("form") === "brew";
+
+const FORMS = {
+  brew: {
+    title: "기록 추가",
+    formId: BREW_NEW_FORM_ID,
+    Body: NewBrewForm,
+    panel: "md:max-w-344",
+  },
+  bean: {
+    title: "원두 등록",
+    formId: BEAN_NEW_FORM_ID,
+    Body: NewBeanForm,
+    panel: "md:max-w-xl",
+  },
+} as const;
+
+/** <dialog aria-labelledby> 가 가리킬 제목. 열려 있는 폼이 하나뿐이라 상수로 둔다. */
+const TITLE_ID = "form-dialog-title";
+
+type FormKey = keyof typeof FORMS;
+
+/**
+ * `?form=` 값은 `string | null` 이라 그대로는 FORMS를 못 찾는다.
+ * true면 FormKey로 봐도 된다고 컴파일러에게 알려주는 게 `formParam is FormKey` — 타입 술어다.
+ *
+ * 캐스트로 넘길 수도 있지만, 그러면 `?form=xyz` 일 때 undefined를 받아놓고 타입은 멀쩡하다.
+ */
+function isFormKey(formParam: string | null): formParam is FormKey {
+  return formParam !== null && formParam in FORMS;
+}
+
+export default function FormDialog() {
+  const formParam = useSearchParams().get("form");
+
+  // 좁힌 키로 맵에서 꺼낸 항목. 열지 않을 때는 null이라 아래 렌더 조건도 겸한다.
+  const activeForm = isFormKey(formParam) ? FORMS[formParam] : null;
+  const isOpen = activeForm !== null;
   const pathname = usePathname();
   const router = useRouter();
   const ref = useRef<HTMLDialogElement>(null);
@@ -32,10 +65,6 @@ export default function NewBrewDialog() {
     if (isOpen && !dialog.open) dialog.showModal();
     if (!isOpen && dialog.open) dialog.close();
 
-    // iOS 사파리는 <dialog>가 열려 있어도 뒤 화면이 스크롤되고 당겨서 새로고침도 걸린다.
-    // 명세상으론 모달이 막아줘야 하지만 지키지 않아서, 열려 있는 동안 직접 잠근다.
-    //   overflow-hidden   스크롤 자체를 막는다
-    //   overscroll-none   끝에 닿았을 때의 튐 · 당겨서 새로고침을 막는다
     const locked = [document.documentElement, document.body];
 
     for (const el of locked) {
@@ -52,20 +81,28 @@ export default function NewBrewDialog() {
 
   return (
     <dialog
-      className="m-auto h-4/5 w-[calc(100%-4rem)] max-w-344 overflow-y-auto overscroll-contain rounded-2xl bg-background backdrop:bg-overlay"
+      aria-labelledby={TITLE_ID}
+      className={cn(
+        "m-auto h-dvh max-h-none w-full max-w-none overflow-y-auto overscroll-contain bg-background backdrop:bg-overlay md:max-h-4/5 md:w-[calc(100%-4rem)] md:rounded-2xl",
+        activeForm?.panel,
+      )}
       onClick={(e) => {
         if (e.target === e.currentTarget) close();
       }}
-      // ESC를 막지 않으면 브라우저가 DOM만 닫아 주소에 ?form=brew 가 남는다.
+
       onCancel={(e) => {
         e.preventDefault();
         close();
       }}
       ref={ref}
     >
-      {isOpen && (
+      {activeForm && (
         <div className="flex min-h-full flex-col">
-          <header className="flex justify-end p-4">
+          <header className="flex items-center justify-between p-4">
+            <h2 className="text-lg font-extrabold" id={TITLE_ID}>
+              {activeForm.title}
+            </h2>
+
             <button
               aria-label="닫기"
               className="rounded-lg px-2 py-1 text-muted-foreground transition-colors hover:bg-primary-tint"
@@ -76,7 +113,7 @@ export default function NewBrewDialog() {
             </button>
           </header>
 
-          <NewBrewForm />
+          <activeForm.Body />
 
           {/* mt-auto — 폼이 짧아도 바닥에 붙는다. sticky — 길어지면 스크롤 위에 떠 있는다.
             저장은 <form> 밖이라 form 속성으로 잇는다. */}
@@ -91,7 +128,7 @@ export default function NewBrewDialog() {
 
             <button
               className="cursor-pointer rounded-xl bg-primary px-6 py-2.5 text-sm font-bold text-primary-foreground transition-colors hover:bg-primary-hover"
-              form={BREW_FORM_ID}
+              form={activeForm.formId}
               type="submit"
             >
               저장

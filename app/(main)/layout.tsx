@@ -2,7 +2,7 @@ import { Suspense } from "react";
 
 import Sidebar from "@/components/sidebar";
 import BottomTab from "@/components/bottom-tab";
-import NewBrewDialog from "@/components/brews/new-brew-dialog";
+import FormDialog from "@/components/form-dialog";
 
 export default function MainLayout({ children }: LayoutProps<"/">) {
   return (
@@ -19,7 +19,7 @@ export default function MainLayout({ children }: LayoutProps<"/">) {
 
       {/* Suspense가 없으면 useSearchParams 때문에 정적 페이지가 전부 클라이언트 렌더로 떨어진다. */}
       <Suspense>
-        <NewBrewDialog />
+        <FormDialog />
       </Suspense>
     </>
   );

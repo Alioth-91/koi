@@ -4,4 +4,5 @@
  *
  * 각자 문자열을 적으면 오타가 나도 타입이 안 잡는다
  */
-export const BREW_FORM_ID = "brew-form";
+export const BREW_NEW_FORM_ID = "brew-new-form";
+export const BEAN_NEW_FORM_ID = "bean-new-form";

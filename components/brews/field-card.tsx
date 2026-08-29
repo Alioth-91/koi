@@ -6,12 +6,23 @@ type Props = ComponentProps<"input"> & {
 };
 
 /**
- * 시안의 입력 카드 한 장 — 라벨 위, 값 아래.
+ * 입력 카드 한 장 — 라벨 위, 값 아래.
  */
 export default function FieldCard({ error, label, ...input }: Props) {
   return (
-    <label className="flex flex-col rounded-2xl border border-border-foreground px-4 py-3.5">
-      <span className="text-[11px] text-muted-foreground">{label}</span>
+    <label className="flex flex-col rounded-2xl border border-border-foreground px-3 py-2">
+      <span className="flex items-center text-[11px] text-muted-foreground">
+        {label}
+
+        {input.required && (
+          <span
+            aria-hidden
+            className="ml-0.5 translate-y-[0.2em] text-lg text-destructive"
+          >
+            *
+          </span>
+        )}
+      </span>
 
       <input
         className="mt-0.5 bg-transparent text-base font-extrabold outline-none placeholder:font-normal placeholder:text-placeholder"
