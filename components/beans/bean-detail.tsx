@@ -116,6 +116,7 @@ function rowsOf(bean: Bean, homeBrews: HomeBrew[]) {
       bean.weight ? `${(bean.weight - used).toLocaleString()}g` : "-",
     ],
     ["로스팅 날짜", bean.roastedAt ? formatDate(bean.roastedAt) : "-"],
+    ["로스팅 포인트", bean.roastLevel ?? "-"],
     ["기록", `${homeBrews.length}건`],
     ["평균 점수", avgScore],
   ];

@@ -17,6 +17,7 @@ export const beans: Bean[] = [
     weight: 200,
     price: 21000,
     process: "무산소",
+    roastLevel: "미디엄 라이트",
   },
   {
     id: "1",
@@ -26,6 +27,7 @@ export const beans: Bean[] = [
     weight: 200,
     price: 18000,
     process: "워시드",
+    roastLevel: "라이트",
   },
   {
     id: "2",
@@ -35,6 +37,7 @@ export const beans: Bean[] = [
     weight: 200,
     price: 15000,
     process: "워시드",
+    roastLevel: "미디엄",
   },
   {
     id: "3",
@@ -44,6 +47,7 @@ export const beans: Bean[] = [
     weight: 250,
     price: 24000,
     process: "무산소",
+    roastLevel: "다크",
   },
   {
     // 이름만 있는 원두 — 상세에서 파생값이 통째로 빈다
@@ -58,6 +62,7 @@ export const beans: Bean[] = [
     weight: 500,
     price: 26000,
     process: "허니",
+    roastLevel: "미디엄 다크",
   },
   {
     // 볶은 날짜가 없어 D+n을 못 구한다. 무게·가격은 있어서 g당 가격은 나온다
