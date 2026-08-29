@@ -1,16 +1,7 @@
 import * as z from "zod";
 
+import { optionalNumber, optionalText } from "@/libs/schemas/fields";
 import type { Brew } from "@/types/brew";
-
-const optionalNumber = z
-  .union([z.literal(""), z.coerce.number().min(0)])
-  .transform((v) => (v === "" ? undefined : v))
-  .optional();
-
-const optionalText = z
-  .string()
-  .transform((v) => (v === "" ? undefined : v))
-  .optional();
 
 const sensoryScore = z
   .union([
@@ -62,9 +53,6 @@ export const cafeSchema = baseSchema.extend({
     .union([z.literal(""), z.enum(["hot", "iced"])])
     .transform((v) => (v === "" ? undefined : v))
     .optional(),
-
-  // 검색해서 고른 자리. 아래 Assert는 이 필드들이 빠져도 못 잡는다 —
-  // BrewForm이 Brew에 "들어맞는지"만 보기 때문에 선택 필드 누락은 통과한다.
   address: optionalText,
   location: z.object({ lat: z.number(), lng: z.number() }).optional(),
 });
@@ -78,10 +66,7 @@ export const brewSchema = z.discriminatedUnion("type", [
 export type BrewForm = z.infer<typeof brewSchema>;
 
 /**
- * 스키마가 뽑은 타입이 Brew와 어긋나면 빌드를 깨뜨린다.
- *
- * 타입 전용이라 컴파일하면 사라진다 — 런타임 비용 0.
- * BrewForm에 id를 붙인 게 곧 Brew여야 한다는 뜻이다.
+ * 스키마가 뽑은 타입이 types/brew와 어긋나면 빌드를 깨뜨린다.
  */
 type Assert<T extends true> = T;
 
