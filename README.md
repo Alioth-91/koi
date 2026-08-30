@@ -44,3 +44,72 @@ public/
 ├── favicon.svg
 └── fonts/                    Pretendard (본문) — Archivo는 next/font로 받아옴
 ```
+
+## 데이터베이스 스키마
+
+```mermaid
+erDiagram
+    users ||--o{ user_identities : "소셜 연결"
+    users ||--o{ beans : "소유"
+    users ||--o{ brews : "소유"
+    beans ||--o{ brews : "집 기록만"
+
+    users {
+        uuid id PK
+        text display_name
+        timestamptz created_at
+    }
+
+    user_identities {
+        uuid id PK
+        uuid user_id FK
+        text provider "email google kakao"
+        text provider_uid "provider와 함께 UNIQUE"
+        timestamptz created_at
+    }
+
+    beans {
+        uuid id PK
+        uuid user_id FK
+        text name "필수"
+        text roastery "동명 원두를 구분하는 값"
+        date roasted_at "D+n 의 기준"
+        numeric weight "봉지 용량. 없을 수 있다"
+        integer price "없을 수 있다"
+        text process "자유 입력. 배지 색에 폴백 필요"
+        text roast_level "자유 입력"
+        boolean archived "사용자가 누르는 소진 토글"
+        timestamptz created_at
+    }
+
+    brews {
+        uuid id PK "앱이 crypto.randomUUID 로 만든다"
+        uuid user_id FK
+        text type "home 또는 cafe"
+        date date "사용자가 고른 달력 날짜"
+        numeric score "0-5, 0.5 단위. 유일한 점수"
+        text memo
+        text_array photos "최대 3장. 순서가 sort 0-2"
+        boolean is_public "기본 false"
+        timestamptz created_at "date 와 다른 값"
+        smallint acidity "체감 0-5. 0은 안 고름"
+        smallint sweetness
+        smallint bitterness
+        smallint body
+        smallint aftertaste
+        uuid bean_id FK "집. 원두가 지워지면 NULL"
+        text bean_name "집. 저장 시점의 이름"
+        numeric dose "집. g"
+        numeric water "집. ml"
+        smallint water_temp "집. 섭씨"
+        text method "집. 추출 도구"
+        integer duration_seconds "집. 타이머 경과"
+        text cafe_name "카페"
+        text menu "카페"
+        integer price "카페. 원"
+        text address "카페"
+        numeric lat "카페"
+        numeric lng "카페"
+        text temperature "카페. hot 또는 iced"
+    }
+```
