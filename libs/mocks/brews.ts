@@ -99,7 +99,13 @@ export const brews: Brew[] = [
     beanName: "콜롬비아 수프리모",
     method: "에어로프레스",
     time: "1:50",
-    sensory: { sweetness: 4, bitterness: 3, body: 4 },
+    sensory: {
+      acidity: 0,
+      sweetness: 4,
+      bitterness: 3,
+      body: 4,
+      aftertaste: 0,
+    },
   },
   {
     // 맛을 아예 안 넣은 기록 — 상세에서 맛 섹션이 통째로 빈다
@@ -109,6 +115,13 @@ export const brews: Brew[] = [
     score: 2.5,
     beanName: "블렌드 하우스",
     memo: "정신없이 내려서 아무것도 못 적었다. 맛도 그저 그랬음.",
+    sensory: {
+      acidity: 0,
+      sweetness: 0,
+      bitterness: 0,
+      body: 0,
+      aftertaste: 0,
+    },
   },
   {
     id: "5",
@@ -139,7 +152,13 @@ export const brews: Brew[] = [
     water: 260,
     time: "2:10",
     memo: "분쇄도를 두 클릭 굵게. 쓴맛이 덜하다.",
-    sensory: { acidity: 4, sweetness: 3, bitterness: 2, body: 4 },
+    sensory: {
+      acidity: 4,
+      sweetness: 3,
+      bitterness: 2,
+      body: 4,
+      aftertaste: 0,
+    },
   },
   {
     id: "6",
@@ -151,7 +170,10 @@ export const brews: Brew[] = [
     memo: "간판이 없어서 두 번 지나쳤다.",
     sensory: {
       acidity: 2,
+      sweetness: 0,
       bitterness: 4,
+      body: 0,
+      aftertaste: 0,
     },
   },
   {
@@ -181,7 +203,13 @@ export const brews: Brew[] = [
     menu: "플랫화이트",
     temperature: "hot",
     price: 6000,
-    sensory: { sweetness: 4, body: 4 },
+    sensory: {
+      acidity: 0,
+      sweetness: 4,
+      bitterness: 0,
+      body: 4,
+      aftertaste: 0,
+    },
   },
   {
     id: "9",
@@ -192,7 +220,13 @@ export const brews: Brew[] = [
     method: "모카포트",
     dose: 16,
     memo: "너무 오래 올려뒀다. 탄맛.",
-    sensory: { acidity: 1, bitterness: 5, body: 3 },
+    sensory: {
+      acidity: 1,
+      sweetness: 0,
+      bitterness: 5,
+      body: 3,
+      aftertaste: 0,
+    },
   },
   {
     id: "10",
@@ -222,7 +256,13 @@ export const brews: Brew[] = [
     dose: 22,
     water: 350,
     time: "4:00",
-    sensory: { acidity: 1, bitterness: 4, body: 5, aftertaste: 3 },
+    sensory: {
+      acidity: 1,
+      sweetness: 0,
+      bitterness: 4,
+      body: 5,
+      aftertaste: 3,
+    },
   },
   {
     id: "12",
@@ -253,7 +293,13 @@ export const brews: Brew[] = [
     dose: 18,
     water: 270,
     time: "3:00",
-    sensory: { acidity: 4, sweetness: 3, body: 3 },
+    sensory: {
+      acidity: 4,
+      sweetness: 3,
+      bitterness: 0,
+      body: 3,
+      aftertaste: 0,
+    },
   },
   {
     id: "14",
@@ -265,6 +311,13 @@ export const brews: Brew[] = [
     temperature: "iced",
     price: 2000,
     memo: "가격값은 했다.",
+    sensory: {
+      acidity: 0,
+      sweetness: 0,
+      bitterness: 0,
+      body: 0,
+      aftertaste: 0,
+    },
   },
   {
     id: "15",
@@ -294,6 +347,12 @@ export const brews: Brew[] = [
     menu: "카푸치노",
     temperature: "hot",
     price: 5500,
-    sensory: { sweetness: 4, bitterness: 3, aftertaste: 2 },
+    sensory: {
+      acidity: 0,
+      sweetness: 4,
+      bitterness: 3,
+      body: 0,
+      aftertaste: 2,
+    },
   },
 ];

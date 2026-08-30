@@ -76,7 +76,7 @@ export default function SensoryFields({ register, values }: Props) {
               <input
                 className="peer sr-only"
                 type="radio"
-                value=""
+                value="0"
                 {...register(`sensory.${key}`)}
               />
 

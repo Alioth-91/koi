@@ -3,14 +3,18 @@ import * as z from "zod";
 import { optionalNumber, optionalText } from "@/libs/schemas/fields";
 import type { Brew } from "@/types/brew";
 
+/**
+ * 안 고른 축은 0이다. 라디오 미선택은 null, ✕ 칸은 "0", 등록 전에는 undefined로 온다.
+ * `v == null` 은 null과 undefined를 한 번에 받는다(`===` 두 번을 대신한다).
+ */
 const sensoryScore = z
   .union([
     z.literal(""),
     z.null(),
-    z.coerce.number().pipe(z.literal([1, 2, 3, 4, 5])),
+    z.undefined(),
+    z.coerce.number().pipe(z.literal([0, 1, 2, 3, 4, 5])),
   ])
-  .transform((v) => (v === "" || v === null ? undefined : v))
-  .optional();
+  .transform((v) => (v === "" || v == null ? 0 : v));
 
 /**
  * 기록 공통 폼 스키마
@@ -19,18 +23,15 @@ const baseSchema = z.object({
   date: z.iso.date(),
   score: z.number().min(0).max(5).multipleOf(0.5),
   memo: optionalText,
-  sensory: z
-    .object({
-      acidity: sensoryScore,
-      body: sensoryScore,
-      bitterness: sensoryScore,
-      sweetness: sensoryScore,
-      aftertaste: sensoryScore,
-    })
-    .transform((obj) =>
-      Object.values(obj).every((v) => v === undefined) ? undefined : obj,
-    )
-    .optional(),
+  // 선택이 아니다. 라디오가 항상 등록되어 있어 sensory 키는 늘 존재하고,
+  // 안 고른 축은 null로 와서 위 transform이 0으로 바꾼다.
+  sensory: z.object({
+    acidity: sensoryScore,
+    body: sensoryScore,
+    bitterness: sensoryScore,
+    sweetness: sensoryScore,
+    aftertaste: sensoryScore,
+  }),
 });
 
 export const homeSchema = baseSchema.extend({

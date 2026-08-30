@@ -14,9 +14,8 @@ export default function BrewDetail({ brew }: { brew: Brew }) {
   const bars = SENSORY.map(([key, label, color]) => ({
     label,
     color,
-    value: brew.sensory?.[key] ?? 0,
-  })).filter((bar) => bar.value > 0);
-
+    value: brew.sensory[key],
+  }));
   return (
     <article className="flex flex-col gap-4 p-6">
       <header>
@@ -53,32 +52,35 @@ export default function BrewDetail({ brew }: { brew: Brew }) {
         ))}
       </dl>
 
-      {!!bars.length && (
-        <section>
-          <h3 className="mb-2.5 text-[11px] tracking-widest text-muted-foreground">
-            센서리
-          </h3>
+      <section>
+        <h3 className="mb-2.5 text-[11px] tracking-widest text-muted-foreground">
+          센서리
+        </h3>
 
-          {bars.map((bar) => (
-            <div key={bar.label} className="mb-2 flex items-center gap-3">
-              <span className="w-8 shrink-0 text-xs text-subtle-foreground">
-                {bar.label}
-              </span>
+        {bars.map((bar) => (
+          <div key={bar.label} className="mb-2 flex items-center gap-3">
+            <span className="w-8 shrink-0 text-xs text-subtle-foreground">
+              {bar.label}
+            </span>
 
-              <span className="h-1.5 flex-1 rounded-full bg-primary-tint">
-                <span
-                  className={`block h-full rounded-full ${bar.color}`}
-                  style={{ width: `${bar.value * 20}%` }}
-                />
-              </span>
+            <span className="h-1.5 flex-1 rounded-full bg-primary-tint">
+              <span
+                className={`block h-full rounded-full ${bar.color}`}
+                style={{ width: `${bar.value * 20}%` }}
+              />
+            </span>
 
-              <span className="font-archivo text-xs font-extrabold">
-                {bar.value}
-              </span>
-            </div>
-          ))}
-        </section>
-      )}
+            <span
+              className={cn(
+                "font-archivo text-xs font-extrabold",
+                !bar.value && "text-placeholder",
+              )}
+            >
+              {bar.value}
+            </span>
+          </div>
+        ))}
+      </section>
 
       {brew.memo && (
         <section className="rounded-2xl bg-primary-tint p-4">

@@ -1,18 +1,18 @@
-type SensoryScore = 1 | 2 | 3 | 4 | 5;
+type SensoryScore = 0 | 1 | 2 | 3 | 4 | 5;
 
 type Sensory = {
-  acidity?: SensoryScore; // 산미
-  body?: SensoryScore; // 바디감
-  bitterness?: SensoryScore; // 쓴맛
-  sweetness?: SensoryScore; // 단맛
-  aftertaste?: SensoryScore; // 여운
+  acidity: SensoryScore; // 산미
+  body: SensoryScore; // 바디감
+  bitterness: SensoryScore; // 쓴맛
+  sweetness: SensoryScore; // 단맛
+  aftertaste: SensoryScore; // 여운
 };
 
 type BrewBase = {
   date: string; // YYYY-MM-DD, 문자열 정렬만으로 날짜순이 됨
   id: string;
   score: number; // 0.5 단위
-  sensory?: Sensory; // 미입력 축은 넣지 않는다
+  sensory: Sensory; // 미입력 축은 0으로 저장한다
   memo?: string;
 };
 
