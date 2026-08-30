@@ -20,7 +20,7 @@ export default function BeansLayout({ children }: LayoutProps<"/beans">) {
           href="?form=bean"
           className="rounded-xl bg-primary px-3 py-2 text-sm font-bold text-primary-foreground transition-colors hover:bg-primary-hover"
         >
-          원두 추가
+          원두 등록
         </Link>
       </header>
 
