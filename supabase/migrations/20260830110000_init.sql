@@ -1,7 +1,7 @@
 -- koi 초기 스키마 (2026-08-30)
 --
 -- Supabase SQL Editor 에서 실제로 실행해 통과한 SQL 이다.
--- 설계 근거는 .claude/records/2026-08-30.md, 관계도는 README.md.
+-- 설계 근거는 .ai/records/2026-08-30.md, 관계도는 README.md.
 --
 -- 계정은 Supabase Auth 가 관리한다 (auth.users · auth.identities).
 -- 명세 7장의 "(provider, provider_uid) 가 유일 키" 와 "다른 provider 로 오면 연결" 을

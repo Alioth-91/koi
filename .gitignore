@@ -41,4 +41,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-/.ai/
+# Agent context: publish reviewed Markdown, keep recovery snapshots and exports local
+/.ai/**
+!/.ai/
+!/.ai/AGENTS.md
+!/.ai/CLAUDE.md
+!/.ai/PLAN.md
