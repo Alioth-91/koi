@@ -1,6 +1,16 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextRequest, NextResponse } from "next/server";
 
+// 설정은 계정 정보가 포함되므로 비로그인 화면을 렌더링하지 않는다.
+// 나머지 메인 화면은 게스트 미리보기를 위해 페이지까지 통과시킨다.
+const protectedPrefixes = ["/settings"] as const;
+
+function isProtectedPath(pathname: string) {
+  return protectedPrefixes.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+  );
+}
+
 /**
  * 요청마다 토큰을 갱신한다.
  *
@@ -40,7 +50,17 @@ export async function proxy(request: NextRequest) {
   );
 
   // 응답이 나가기 전에 불러야 갱신된 토큰이 위 setAll로 살린다
-  await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user && isProtectedPath(request.nextUrl.pathname)) {
+    const loginUrl = request.nextUrl.clone();
+    loginUrl.pathname = "/login";
+    loginUrl.search = "";
+
+    return NextResponse.redirect(loginUrl);
+  }
 
   return response;
 }

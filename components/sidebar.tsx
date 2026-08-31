@@ -7,7 +7,16 @@ import { isActiveNav, navItems } from "@/libs/constants/routes";
 import { SITE } from "@/libs/constants/site";
 import { cn } from "@/libs/utils";
 
-export default function Sidebar() {
+export type SidebarProfile = {
+  displayName: string;
+  avatarUrl: string | null;
+};
+
+type SidebarProps = {
+  profile: SidebarProfile | null;
+};
+
+export default function Sidebar({ profile }: SidebarProps) {
   const pathName = usePathname();
 
   return (
@@ -21,7 +30,10 @@ export default function Sidebar() {
 
       <ul className="flex flex-1 flex-col md:gap-2">
         {navItems
-          .filter((item) => !item.disabled)
+          .filter(
+            (item) =>
+              !item.disabled && (item.href !== "/settings" || profile !== null),
+          )
           .map((item) => {
             const isActive = isActiveNav(pathName, item.href);
 
@@ -46,12 +58,53 @@ export default function Sidebar() {
         <li className="md:mt-5">
           <Link
             className="block w-full rounded-xl bg-primary py-3.5 text-center font-extrabold text-primary-foreground transition hover:bg-primary-hover"
-            href="?form=brew"
+            href={profile ? "?form=brew" : "/login"}
           >
             기록 추가
           </Link>
         </li>
       </ul>
+
+      {profile ? (
+        <Link
+          aria-label="프로필 설정"
+          className="flex items-center justify-center gap-3 rounded-xl p-2 text-left transition-colors hover:bg-primary-tint xl:justify-start xl:px-4"
+          href="/settings"
+        >
+          {profile.avatarUrl ? (
+            // OAuth provider URL은 제공처마다 달라 next/image의 고정 허용 목록을 두지 않는다.
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              alt=""
+              className="size-8 shrink-0 rounded-full object-cover"
+              height={36}
+              loading="lazy"
+              referrerPolicy="no-referrer"
+              src={profile.avatarUrl}
+              width={36}
+            />
+          ) : (
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary-tint text-sm font-extrabold text-foreground">
+              {profile.displayName.slice(0, 1)}
+            </span>
+          )}
+
+          <span className="hidden min-w-0 truncate font-semibold text-foreground xl:block">
+            {profile.displayName}
+          </span>
+        </Link>
+      ) : (
+        <Link
+          aria-label="로그인"
+          className="flex items-center justify-center gap-3 rounded-xl p-2 text-left font-semibold text-subtle-foreground transition-colors hover:bg-primary-tint xl:justify-start xl:px-4"
+          href="/login"
+        >
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary-tint text-sm">
+            →
+          </span>
+          <span className="hidden xl:block">로그인</span>
+        </Link>
+      )}
     </nav>
   );
 }

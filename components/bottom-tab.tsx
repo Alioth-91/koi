@@ -6,7 +6,11 @@ import { usePathname } from "next/navigation";
 import { isActiveNav, navItems } from "@/libs/constants/routes";
 import { cn } from "@/libs/utils";
 
-export default function BottomTab() {
+type Props = {
+  isAuthenticated: boolean;
+};
+
+export default function BottomTab({ isAuthenticated }: Props) {
   const pathName = usePathname();
 
   return (
@@ -16,7 +20,10 @@ export default function BottomTab() {
     >
       <ul className="flex flex-1">
         {navItems
-          .filter((item) => !item.disabled)
+          .filter(
+            (item) =>
+              !item.disabled && (item.href !== "/settings" || isAuthenticated),
+          )
           .map((item) => {
             const isActive = isActiveNav(pathName, item.href);
 
