@@ -34,7 +34,7 @@ export default async function BeanDetailPage({
   // 선택한 원두를 기록에서 필터링
   const beanBrews = brews
     .filter((brew) => brew.type === "home")
-    .filter((brew) => brew.beanName === bean.name);
+    .filter((brew) => brew.beanId === bean.id);
 
   return <BeanDetail bean={bean} homeBrews={beanBrews} />;
 }

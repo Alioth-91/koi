@@ -3,9 +3,8 @@ import { Bean } from "@/types/bean";
 /**
  * 진짜 데이터가 붙으면 이 파일은 지운다.
  *
- * 이름을 mocks/brews.ts의 beanName과 일부러 맞춰뒀다.
- * 아직 기록이 원두를 id로 가리키지 않아서, "이 원두로 만든 기록"은
- * 지금은 이름으로만 이어붙일 수 있다.
+ * mocks/brews.ts의 beanId와 연결된다.
+ * beanName은 기록 당시 이름을 보여주는 스냅샷이라 연결 키로 쓰지 않는다.
  */
 export const beans: Bean[] = [
   {

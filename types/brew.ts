@@ -17,6 +17,8 @@ type BrewBase = {
 };
 
 export type HomeBrew = BrewBase & {
+  // 원두가 삭제되면 기록은 남기고 연결만 끊길 수 있다.
+  beanId?: string;
   beanName: string;
   dose?: number;
   method?: string; // 추출 방식(ex. 에스프레소, 핸드드립, 프렌치프레스 등)
