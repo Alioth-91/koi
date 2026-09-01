@@ -2,21 +2,108 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --border-foreground: #edeef1;
+
+  /* 본문 */
+  --foreground: #09090b;
+  --subtle-foreground: #52525b;
+  --label-foreground: #3f3f46;
+  --muted-foreground: #71717a;
+  --placeholder: #a1a1aa;
+
+  /* sensory */
+  --acidity: #f43f5e; /* 산미 — rose */
+  --acidity-deep: #be123c;
+  --sweetness: #f59e0b; /* 단맛 — amber */
+  --sweetness-deep: #b45309;
+  --bitterness: #78716c; /* 쓴맛 — stone */
+  --bitterness-deep: #57534e;
+  --body: #0d9488; /* 바디 — teal */
+  --body-deep: #0f766e;
+  --aftertaste: #8b5cf6; /* 여운 — violet */
+  --aftertaste-deep: #6d28d9;
+
+  /* 가공 방식 배지 */
+  --process-washed: #e0f2fe;
+  --process-washed-foreground: #075985;
+  --process-natural: #ffe4e6;
+  --process-natural-foreground: #9f1239;
+  --process-honey: #fef3c7;
+  --process-honey-foreground: #92400e;
+  --process-anaerobic: #fae8ff;
+  --process-anaerobic-foreground: #701a75;
+
+  /* 기록 유형 배지 */
+  --badge-home: #601d49;
+  --badge-home-foreground: #ffffff;
+  --badge-cafe: #ffebb8;
+  --badge-cafe-foreground: #601d49; /* 흰색은 대비 1.2:1이라 안 읽힌다 */
+
+  /* Primary — 채움과 강조는 전부 이 한 갈래 */
+  --primary: #18181b; /* 저장/추가 버튼, 초점, 선택 칩 */
+  --primary-hover: #6c6c6d; /* hover · pressed */
+  --primary-foreground: #fafafa; /* primary 면 위 텍스트 */
+  --primary-muted: #3f3f46; /* primary 면 위 보조 텍스트 */
+  --primary-tint: #f4f4f5; /* 옅은 강조 배경 */
+  --primary-tint-strong: #e4e4e7; /* 선택 영역, 옅은 보더 */
+
+  /* 상태 · 오버레이 — 빨강은 여기서만 */
+  --destructive: #dc2626; /* 필수 표시, 삭제 */
+  --overlay: rgb(9 9 11 / 0.45); /* 바텀시트 · 모달 딤 */
+  --shadow-card: 0 6px 24px rgb(9 9 11 / 0.06); /* 카드 그림자 */
+  --shadow-sheet: 0 -2px 12px rgb(9 9 11 / 0.1); /* 시트 상단 그림자 */
 }
 
 @theme inline {
   --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --color-border-foreground: var(--border-foreground);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* 본문 */
+  --color-foreground: var(--foreground);
+  --color-subtle-foreground: var(--subtle-foreground);
+  --color-label-foreground: var(--label-foreground);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-placeholder: var(--placeholder);
+
+  --font-archivo: var(--font-archivo);
+  --font-mono: var(--font-geist-mono);
+
+  --color-acidity: var(--acidity);
+  --color-acidity-deep: var(--acidity-deep);
+  --color-sweetness: var(--sweetness);
+  --color-sweetness-deep: var(--sweetness-deep);
+  --color-bitterness: var(--bitterness);
+  --color-bitterness-deep: var(--bitterness-deep);
+  --color-body: var(--body);
+  --color-body-deep: var(--body-deep);
+  --color-aftertaste: var(--aftertaste);
+  --color-aftertaste-deep: var(--aftertaste-deep);
+
+  --color-badge-home: var(--badge-home);
+  --color-badge-home-foreground: var(--badge-home-foreground);
+  --color-badge-cafe: var(--badge-cafe);
+  --color-badge-cafe-foreground: var(--badge-cafe-foreground);
+
+  --color-process-washed: var(--process-washed);
+  --color-process-washed-foreground: var(--process-washed-foreground);
+  --color-process-natural: var(--process-natural);
+  --color-process-natural-foreground: var(--process-natural-foreground);
+  --color-process-honey: var(--process-honey);
+  --color-process-honey-foreground: var(--process-honey-foreground);
+  --color-process-anaerobic: var(--process-anaerobic);
+  --color-process-anaerobic-foreground: var(--process-anaerobic-foreground);
+
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-muted: var(--primary-muted);
+  --color-primary-tint: var(--primary-tint);
+  --color-primary-tint-strong: var(--primary-tint-strong);
+
+  --color-destructive: var(--destructive);
+  --color-overlay: var(--overlay);
+  --shadow-card: var(--shadow-card);
+  --shadow-sheet: var(--shadow-sheet);
 }
 
 body {
