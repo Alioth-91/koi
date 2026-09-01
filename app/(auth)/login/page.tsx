@@ -22,7 +22,7 @@ export default function LoginPage() {
             className="mx-auto mb-4 size-18"
             height={72}
             loading="eager"
-            src="/favicon.svg"
+            src="/icon.svg"
             width={72}
           />
           <h1 className="font-archivo text-4xl font-extrabold">{SITE.name}</h1>
