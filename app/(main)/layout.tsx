@@ -2,7 +2,6 @@ import { Suspense } from "react";
 import type { User } from "@supabase/supabase-js";
 
 import Sidebar, { type SidebarProfile } from "@/components/sidebar";
-import LoginGate from "@/components/auth/login-gate";
 import BottomTab from "@/components/bottom-tab";
 import FormDialog from "@/components/form-dialog";
 import { createClient } from "@/libs/db/server";
@@ -44,7 +43,7 @@ export default async function MainLayout({ children }: LayoutProps<"/">) {
         <div className="flex min-h-0 w-full max-w-344">
           <Sidebar profile={toSidebarProfile(user)} />
 
-          <LoginGate isAuthenticated={isAuthenticated}>{children}</LoginGate>
+          {children}
         </div>
       </div>
 
