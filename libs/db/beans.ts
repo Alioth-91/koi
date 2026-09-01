@@ -1,5 +1,6 @@
-import { toBean } from "@/libs/db/bean-mappers";
+import { toBean, toBeanInsert } from "@/libs/db/bean-mappers";
 import { createClient } from "@/libs/db/server";
+import type { BeanForm } from "@/libs/schemas/bean";
 import type { Bean } from "@/types/bean";
 
 /**
@@ -39,4 +40,21 @@ export async function getBeanById(id: string): Promise<Bean | null> {
   }
 
   return data ? toBean(data) : null;
+}
+
+/**
+ * 원두를 저장한다. user_id는 호출자가 세션에서 확인한 값만 받는다.
+ */
+export async function insertBean(
+  input: BeanForm,
+  userId: string,
+): Promise<void> {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("beans")
+    .insert(toBeanInsert(input, userId));
+
+  if (error) {
+    throw new Error("원두를 저장하지 못했습니다", { cause: error });
+  }
 }
