@@ -1,6 +1,8 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextRequest, NextResponse } from "next/server";
 
+import { redirectWithResponseState } from "@/libs/auth/response";
+
 // 설정은 계정 정보가 포함되므로 비로그인 화면을 렌더링하지 않는다.
 // 나머지 메인 화면은 게스트 미리보기를 위해 페이지까지 통과시킨다.
 const protectedPrefixes = ["/settings"] as const;
@@ -18,6 +20,7 @@ function isProtectedPath(pathname: string) {
  */
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
+  const authResponseHeaders: Record<string, string> = {};
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -41,9 +44,10 @@ export async function proxy(request: NextRequest) {
           );
 
           // 응답이 캐시되면 남의 세션이 다른 사람에게 전달된다
-          Object.entries(headers).forEach(([key, value]) =>
-            response.headers.set(key, value),
-          );
+          Object.entries(headers).forEach(([key, value]) => {
+            authResponseHeaders[key] = value;
+            response.headers.set(key, value);
+          });
         },
       },
     },
@@ -59,7 +63,7 @@ export async function proxy(request: NextRequest) {
     loginUrl.pathname = "/login";
     loginUrl.search = "";
 
-    return NextResponse.redirect(loginUrl);
+    return redirectWithResponseState(loginUrl, response, authResponseHeaders);
   }
 
   return response;

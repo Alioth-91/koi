@@ -1,7 +1,7 @@
 import { AuthApiError, AuthWeakPasswordError } from "@supabase/supabase-js";
 import { describe, expect, it } from "vitest";
 
-import { toSignUpErrorState } from "@/libs/auth-errors";
+import { toSignUpErrorState } from "@/libs/auth/errors";
 
 describe("toSignUpErrorState", () => {
   it("유출된 비밀번호를 비밀번호 필드 오류로 바꾼다", () => {

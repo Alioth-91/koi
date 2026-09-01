@@ -3,11 +3,14 @@
 import { redirect } from "next/navigation";
 import * as z from "zod";
 
-import { type AuthActionState, toSignUpErrorState } from "@/libs/auth-errors";
+import {
+  type AuthActionState,
+  toSignUpErrorState,
+} from "@/libs/auth/errors";
 import { createClient } from "@/libs/db/server";
 import { signInSchema, signUpSchema } from "@/libs/schemas/auth";
 
-export type { AuthActionState } from "@/libs/auth-errors";
+export type { AuthActionState } from "@/libs/auth/errors";
 
 export async function signIn(input: unknown): Promise<AuthActionState> {
   const parsed = signInSchema.safeParse(input);
