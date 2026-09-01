@@ -1,4 +1,5 @@
 import { PROCESS_BADGE, PROCESS_FALLBACK } from "@/libs/constants/beans";
+import { remainingWeight } from "@/libs/beans/calculations";
 import { cn, formatDate, formatScore } from "@/libs/utils";
 import { Bean } from "@/types/bean";
 import { HomeBrew } from "@/types/brew";
@@ -101,6 +102,7 @@ export default function BeanDetail({ bean, homeBrews }: BeanDetailProps) {
 
 function rowsOf(bean: Bean, homeBrews: HomeBrew[]) {
   const used = homeBrews.reduce((sum, brew) => sum + (brew.dose ?? 0), 0);
+  const remaining = remainingWeight(bean.weight, used);
   const avgScore = homeBrews.length
     ? formatScore(
         homeBrews.reduce((sum, brew) => sum + brew.score, 0) / homeBrews.length,
@@ -113,7 +115,7 @@ function rowsOf(bean: Bean, homeBrews: HomeBrew[]) {
     ["구매 용량", bean.weight ? `${bean.weight.toLocaleString()}g` : "-"],
     [
       "남은 용량(추정)",
-      bean.weight ? `${(bean.weight - used).toLocaleString()}g` : "-",
+      remaining === undefined ? "-" : `${remaining.toLocaleString()}g`,
     ],
     ["로스팅 날짜", bean.roastedAt ? formatDate(bean.roastedAt) : "-"],
     ["로스팅 포인트", bean.roastLevel ?? "-"],

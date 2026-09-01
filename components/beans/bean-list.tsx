@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { Bean } from "@/types/bean";
+import { daysSinceRoast } from "@/libs/beans/calculations";
 import { cn } from "@/libs/utils";
+import { Bean } from "@/types/bean";
 
 type Props = {
   beans: Bean[];
@@ -35,6 +36,7 @@ export default function BeanList({ beans }: Props) {
     >
       {beans.map((bean) => {
         const isActive = pathName === `/beans/${bean.id}`;
+        const roastDays = daysSinceRoast(bean.roastedAt);
 
         return (
           <li key={bean.id}>
@@ -56,10 +58,10 @@ export default function BeanList({ beans }: Props) {
                 </span>
               </span>
 
-              {bean.roastedAt && (
+              {roastDays !== undefined && (
                 <span className="font-archivo font-extrabold">
                   <span className="sr-only">볶은 후 지난 일수 </span>
-                  {daysSinceRoast(bean.roastedAt)}
+                  {`D+${String(roastDays).padStart(2, "0")}`}
                 </span>
               )}
             </Link>
@@ -79,18 +81,4 @@ export default function BeanList({ beans }: Props) {
  */
 function summarize(bean: Bean) {
   return [bean.roastery, bean.process].filter(Boolean).join(" · ");
-}
-
-/**
- * 볶은 날부터 오늘까지 며칠 → "D+04"
- */
-function daysSinceRoast(roastedAt: string) {
-  const [year, month, day] = roastedAt.split("-").map(Number);
-  const roasted = new Date(year, month - 1, day); // month는 0부터
-  const now = new Date();
-  const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
-  const days = Math.round((midnight.getTime() - roasted.getTime()) / 8640_0000);
-
-  return `D+${String(days).padStart(2, "0")}`;
 }
