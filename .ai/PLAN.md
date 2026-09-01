@@ -27,77 +27,81 @@
 
 ## 할 일
 
-##### 260901
+##### 260902 — 원두 DB 연결 (내일)
 
-1. 게스트 화면의 서버 경계
+내일은 아래 순서로 진행한다. 각 항목은 별도 승인·검증 단위로 나누고, 이번 순서에서는 DB
+스키마를 변경하지 않는다.
 
-- [ ] `GuestPreview`를 정적 서버 컴포넌트로 만들고 실제 DB 목록·상세 children은 비로그인 상태에서 렌더링하지 않는다.
-- [ ] `LoginGate`를 서버 경계로 옮기고 `/`, `/brews`, `/beans`, `/recipes`를 비공개 route group으로 묶는다. `/community`는 공개 group에 남긴다.
-- [ ] preview의 배경은 2열 정적 패널과 로그인 CTA만 사용한다. 실제 링크·버튼은 두지 않아 Tab 포커스가 숨은 콘텐츠로 이동하지 않게 한다.
-- [ ] 로그인 상태에서만 `FormDialog`를 렌더링하는 현재 동작을 유지한다.
-- ▸ 완료 조건: 게스트 요청의 서버 응답에 실제 목록·등록 폼이 없고, Tab 키는 로그인 CTA만 거치며, 로그인 사용자 화면과 `/community`는 기존 동작을 유지한다.
+1. **DB row ↔ 앱 타입 매핑**
 
-2. 인증 경계 보강
+- [ ] `libs/db/bean-mappers.ts`에 `snake_case` row를 `Bean`으로 바꾸는 순수 함수를 만든다.
+- [ ] `null` 선택값은 `undefined`로 바꾸고, DB의 `user_id`·`created_at`은 화면 타입에 노출하지 않는다.
+- [ ] 같은 파일의 매핑 테스트를 작성한다.
+- ▸ 완료 조건: 알려진 DB row와 폼의 정규화된 값이 기대한 `Bean`·insert row로 변환된다.
 
-- [ ] `/settings` redirect 응답에 `proxy.ts`의 갱신·삭제 쿠키와 헤더가 유실되지 않는지 확인하고 필요한 복사를 추가한다.
+2. **원두 조회 어댑터**
+
+- [ ] `libs/db/beans.ts`에 `listBeans()`와 `getBeanById(id)`만 먼저 만든다.
+- [ ] `libs/db/server.ts`의 요청별 클라이언트를 사용하고 RLS가 현재 사용자 소유권을 검사하게 둔다.
+- [ ] 화면과 목업은 아직 바꾸지 않는다.
+- ▸ 완료 조건: 타입이 지정된 Supabase query가 컴파일되고, 오류는 사용자에게 노출할 내부 상세 없이 의미 있는 오류로 바뀐다.
+
+3. **원두 추가 어댑터와 Server Action**
+
+- [ ] `libs/db/beans.ts`에 `insertBean(input, userId)`를 추가한다.
+- [ ] `app/(main)/(private)/beans/actions.ts`의 `createBean(input: unknown)`에서 `getUser()`를 확인한다.
+- [ ] 같은 `beanSchema`로 서버에서 `safeParse`하고 성공한 `parsed.data`만 저장한다.
+- ▸ 완료 조건: 비로그인 요청은 저장하지 않고, 잘못된 입력은 필드 오류로 돌아오며, 정상 입력은 RLS를 통과한 내 원두로 저장된다.
+
+4. **원두 등록 폼 연결**
+
+- [ ] `components/beans/new-bean-form.tsx`의 `console.log`를 `createBean` 호출로 교체한다.
+- [ ] 저장 중 상태, 서버 필드 오류, 일반 오류를 표시하고 실패 시 입력값을 유지한다.
+- [ ] 성공 시 모달을 닫고 `/beans` 목록을 갱신한다.
+- ▸ 완료 조건: 로그인한 사용자가 화면에서 원두 하나를 등록하고 저장 결과를 확인할 수 있다.
+
+5. **원두 목록을 DB 조회로 전환**
+
+- [ ] `app/(main)/(private)/beans/layout.tsx`에서 목업 대신 `listBeans()`를 호출한다.
+- [ ] 원두가 없을 때 현재 빈 상태 문구를 유지하고, 보관 원두 자동 전환·자동 제안은 하지 않는다.
+- ▸ 완료 조건: 방금 등록한 원두가 새로고침 후에도 목록에 보인다.
+
+6. **원두 상세와 기록 조회를 DB로 전환**
+
+- [ ] `libs/db/brews.ts`에 row ↔ `Brew` 변환과 현재 사용자 기록 조회를 추가한다.
+- [ ] `app/(main)/(private)/beans/[id]/page.tsx`에서 `getBeanById()`와 `bean_id` 기준 기록 조회를 사용한다.
+- [ ] 잔량·기록 수·평균 점수가 실제 DB 기록으로 계산되는지 확인한다.
+- ▸ 완료 조건: 다른 사용자의 ID를 URL에 넣어도 원두가 조회되지 않고, 내 원두 상세에는 연결된 기록만 보인다.
+
+7. **목업 제거와 전체 검증**
+
+- [ ] 목록·상세·등록의 실제 동작을 확인한 뒤에만 `libs/mocks/beans.ts`, `libs/mocks/brews.ts`를 제거한다.
+- [ ] `pnpm test`, `pnpm lint`, `pnpm exec tsc --noEmit`, 개발 서버를 종료할 수 있을 때 `pnpm build`를 실행한다.
+- [ ] 로그인 사용자 기준 모바일·데스크톱 브라우저와 RLS 소유권을 확인한다.
+
+### 인증 — 아직 남은 일
+
 - [ ] OAuth callback의 운영 canonical origin과 허용 Host 범위를 정한다. 개발용 `localhost` redirect와 분리한다.
-- ▸ 완료 조건: 만료 세션의 `/settings` 접근이 stale cookie를 남기지 않고, 허용된 origin으로만 callback이 완료된다.
 
-3. 외부 provider 실제 확인
+### 원두 화면 — 아직 남은 일
 
-- [ ] Supabase에서 Kakao·Google provider와 callback URL을 설정한다.
-- [ ] 두 provider 로그인 후 `/auth/callback` → `/` 이동, `sb-...-auth-token` 쿠키, `auth.users`·`profiles` 생성을 확인한다.
-- [ ] 실제 DB 저장을 연결하기 전 RLS와 Server Action의 `getUser()` 검증 범위를 점검한다.
-
-### 원두 화면 — 파생값과 연결
-
-- [ ] **`archived` — 원두 상세의 "모두 사용했다" 토글 하나.** 켜고 끄는 것도 여기서.
-      **자동 전환도 제안도 하지 않는다.** `weight` 가 선택 칸이라 판정 근거가 없는 원두가
-      흔하다(선물 · 나눔 · 소분). 조건부로만 뜨는 알림은 사용자가 규칙을 못 배운다
-- [ ] **잔량이 음수면 `0g` 에서 멈춘다.** `bean-detail.tsx:116` 이 지금 `-10g` 을 그대로 낸다.
-      자동 archive를 안 하므로 다 쓰고도 토글을 안 누른 봉지가 이 상태로 남는다
-- [ ] **파생값은 `undefined` 를 돌려주고 `-` 는 화면에서 붙인다.** 계산이 `"-"` 를 돌려주면
-      숫자 자리에 문자열이 섞여 정렬 · 합계가 깨진다 (`bean-detail.tsx` 는 이미 이렇게 한다)
-- [ ] 상세의 **D+n**. `daysSinceRoast` 가 `bean-list.tsx` 에 갇혀 있으니 이때 `libs/utils.ts` 로 옮긴다
-- [ ] **"전체 N건 보기" 의 목적지가 어긋나 있다** — 숫자는 그 원두의 기록 수인데 `/brews` 전체로 간다.
-      라벨에서 숫자를 빼거나, 원두 필터(`/brews?bean=…`, 명세 3.1)를 만들거나
-- [ ] **`beanName` → `beanId` 전환.** `types/brew.ts` 의 `HomeBrew` 와
-      `app/(main)/beans/[id]/page.tsx` 의 `filter` 두 줄까지 같이 바뀐다
-
-**방아쇠 — 로스터리가 다른 동명 원두.** 같은 `케냐 AA` 를 두 곳에서 사면 두 봉지의 기록이 섞여
-잔량 · 기록 수 · 평균이 조용히 틀어진다. **그전까지는 목 데이터의 원두 이름을 유일하게 유지할 것.**
+- [ ] **`archived` — 원두 상세의 "모두 사용했다" 토글 하나.** 켜고 끄는 것도 여기서. 자동 전환이나 제안은 하지 않는다.
+- [ ] **"전체 N건 보기"의 목적지**를 원두 필터(`/brews?bean=…`)로 만들지, 라벨에서 숫자를 뺄지 정한다.
+- [ ] g당 가격·한 잔 원가·소진 예상일의 표시 여부와 값 부족 시 화면 문구를 실제 DB 데이터로 확인하며 정한다.
 
 ### 백엔드 붙이기
 
 폼은 다 도는데 `handleSubmit` 안이 `console.log` 다. `libs/mocks/*` 는 배열 상수라 넣을 데가 없다.
 
-**선 것 (2026-08-30):** Supabase 프로젝트(서울) · 표 셋 · `proxy.ts` · `libs/db/`.
-`supabase/migrations/20260830110000_init.sql` 에 남겼다.
-Free 한도에서 걸릴 건 **둘뿐 — 사진 1GB, 1주 미사용 시 일시정지**.
+**입력 검증**
 
-**로그인** — 구글 · 카카오 소셜 전용. 이메일 인증은 Custom SMTP 구성 전까지 화면에서 숨긴다.
-기존 이메일 파일은 삭제하지 않는다. 애플은 개발자 계정이 연 $99 라 뺀다.
-계정 구분은 이메일이 아니라 `(provider, provider_uid)` — `auth.identities` 가 이미 그 일을 한다.
-
-- [ ] 소셜 로그인 · 로그아웃 실제 연동 확인 (provider Dashboard 설정 후)
-- [ ] **첫 소셜 로그인 후 `profiles` 에 줄이 자동으로 생기는지 확인** — 표 · 정책 · 트리거 ·
-      `proxy.ts` 가 전부 맞물려야 통과한다. 하나라도 어긋나면 여기서 드러난다
-
-**스키마**
-
-- [ ] `libs/schemas/bean.ts` 를 **폼용 / 저장용으로 분리.** `""` 는 HTML 입력칸 사정이라 서버가 볼 일이 없다
-- [ ] 서버 액션 안에서 `safeParse` — **두 번째 관문.** `zodResolver` 는 친절함이고 `curl` 은 그걸 건너뛴다
-- [ ] `Assert` 가 여전히 `types/*.ts` 를 지키는지 확인
+- [ ] 서버 액션에서 같은 `beanSchema.safeParse`를 다시 실행한다. 폼의 `zodResolver`가
+      HTML 문자열을 정규화해도 서버 입력은 신뢰하지 않는다.
+- [ ] 성공한 `parsed.data`만 저장하고, `Assert`가 여전히 `types/*.ts`를 지키는지 확인한다.
 
 **데이터**
 
-- [ ] `libs/mocks/*` 를 DB로 옮기고 파일 삭제
-- [ ] `beanName` → `beanId` (위 "원두 화면" 과 같이)
-- [ ] `types/supabase.ts` 를 `supabase gen types` 로 뽑는다.
-      스키마를 고쳤는데 변환 함수를 안 고치면 `pnpm build` 가 깨지게 만드는 장치다
-- [ ] `libs/db/beans.ts` · `brews.ts` — 조회 · 저장 + Row ↔ 타입 변환.
-      snake_case 를 아는 곳은 여기뿐이다. 센서리 5칸 ↔ `sensory` 객체도 여기서 묶고 편다
-- [ ] `recipes` 는 나중에 (명세 5장)
+- [ ] `recipes`는 나중에 (명세 5장)
 
 **사진** — 명세 3.2의 3슬롯. 아직 스키마에도 없다
 
@@ -120,7 +124,6 @@ Free 한도에서 걸릴 건 **둘뿐 — 사진 1GB, 1주 미사용 시 일시�
 
 **연결**
 
-- [ ] 원두 등록 저장 (`console.log` → 서버 액션)
 - [ ] 기록 저장도 같이
 - [ ] 저장 후 목록 갱신 — `revalidatePath` 인지 `router.refresh()` 인지
 - [ ] 서버에서만 나는 에러를 폼에 표시 (`setError`)
@@ -128,8 +131,7 @@ Free 한도에서 걸릴 건 **둘뿐 — 사진 1GB, 1주 미사용 시 일시�
 
 **확인 수단**
 
-- [ ] 스키마 분리 후 `bean.test.ts` 갱신
-- [ ] **서버 액션은 순수 함수가 아니라 지금 Vitest 범위 밖이다.** 어떻게 확인할지 정할 것
+- [ ] **서버 액션은 현재 Vitest 범위 밖이다.** 실제 로그인 브라우저와 RLS로 확인한다.
 
 ### 폼 남은 칸
 
