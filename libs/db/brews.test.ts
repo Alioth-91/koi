@@ -1,0 +1,107 @@
+import { describe, expect, it } from "vitest";
+
+import { toBrew } from "@/libs/db/brews";
+import type { Database } from "@/types/supabase";
+
+type BrewRow = Database["public"]["Tables"]["brews"]["Row"];
+
+const baseRow: BrewRow = {
+  acidity: 4,
+  address: null,
+  aftertaste: 3,
+  bean_id: "bean-1",
+  bean_name: "예가체프",
+  bitterness: 2,
+  body: 3,
+  cafe_name: null,
+  created_at: "2026-09-02T01:00:00.000Z",
+  date: "2026-09-01",
+  dose: 18,
+  duration_seconds: 150,
+  id: "brew-1",
+  is_public: false,
+  lat: null,
+  lng: null,
+  memo: "단맛이 좋았다",
+  menu: null,
+  method: "핸드드립",
+  photos: [],
+  price: null,
+  score: 4.5,
+  sweetness: 5,
+  temperature: null,
+  type: "home",
+  user_id: "user-1",
+  water: 300,
+  water_temp: 92,
+};
+
+describe("toBrew", () => {
+  it("집 기록의 snake_case와 초 단위 시간을 화면 타입으로 바꾼다", () => {
+    expect(toBrew(baseRow)).toStrictEqual({
+      beanId: "bean-1",
+      beanName: "예가체프",
+      date: "2026-09-01",
+      dose: 18,
+      id: "brew-1",
+      memo: "단맛이 좋았다",
+      method: "핸드드립",
+      score: 4.5,
+      sensory: {
+        acidity: 4,
+        aftertaste: 3,
+        bitterness: 2,
+        body: 3,
+        sweetness: 5,
+      },
+      time: "2:30",
+      type: "home",
+      water: 300,
+      waterTemp: 92,
+    });
+  });
+
+  it("지도 데이터의 위치와 온도를 브라우저 데이터 형식으로 바꾼다", () => {
+    expect(
+      toBrew({
+        ...baseRow,
+        address: "서울 마포구",
+        bean_id: null,
+        bean_name: null,
+        cafe_name: "프릳츠 도화점",
+        date: "2026-08-30",
+        dose: null,
+        duration_seconds: null,
+        lat: 37.5407,
+        lng: 126.9502,
+        memo: null,
+        menu: "아메리카노",
+        method: null,
+        price: 5000,
+        temperature: "hot",
+        type: "cafe",
+        water: null,
+        water_temp: null,
+      }),
+    ).toStrictEqual({
+      address: "서울 마포구",
+      cafeName: "프릳츠 도화점",
+      date: "2026-08-30",
+      id: "brew-1",
+      location: { lat: 37.5407, lng: 126.9502 },
+      memo: undefined,
+      menu: "아메리카노",
+      price: 5000,
+      score: 4.5,
+      sensory: {
+        acidity: 4,
+        aftertaste: 3,
+        bitterness: 2,
+        body: 3,
+        sweetness: 5,
+      },
+      temperature: "hot",
+      type: "cafe",
+    });
+  });
+});
