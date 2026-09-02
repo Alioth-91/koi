@@ -5,6 +5,7 @@ import { useState } from "react";
 import SocialLoginIcon, {
   type SocialProvider,
 } from "@/components/auth/social-login-icon";
+import { getCanonicalOrigin } from "@/libs/auth/origin";
 import { createClient } from "@/libs/db/client";
 
 const providers = [
@@ -20,8 +21,7 @@ const baseButtonClassName =
 
 const buttonClassNames: Record<SocialProvider, string> = {
   kakao: "bg-[#FEE500] text-black/85 hover:shadow-sm",
-  google:
-    "border border-[#747775] bg-white text-[#1F1F1F] hover:bg-[#f8f9fa]",
+  google: "border border-[#747775] bg-white text-[#1F1F1F] hover:bg-[#f8f9fa]",
 };
 
 const errorMessage = "로그인을 시작하지 못했습니다. 잠시 후 다시 시도해주세요";
@@ -40,7 +40,7 @@ export default function SocialLoginButtons() {
       const supabase = createClient();
       const redirectTo = new URL(
         "/auth/callback",
-        window.location.origin,
+        getCanonicalOrigin(),
       ).toString();
 
       const { data, error } = await supabase.auth.signInWithOAuth({
