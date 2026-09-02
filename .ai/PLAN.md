@@ -27,61 +27,26 @@
 
 ## 할 일
 
-##### 260902 — 원두 DB 연결 (내일)
+##### 260903 — 기록 저장과 목업 제거 (다음 작업)
 
-내일은 아래 순서로 진행한다. 각 항목은 별도 승인·검증 단위로 나누고, 이번 순서에서는 DB
-스키마를 변경하지 않는다.
+내일은 기록 등록을 실제 저장에 연결한다. 저장 성공을 확인한 뒤에만 목업을 제거한다.
 
-1. **DB row ↔ 앱 타입 매핑**
+1. **기록 등록을 실제 DB 저장으로 연결**
 
-- [ ] `libs/db/bean-mappers.ts`에 `snake_case` row를 `Bean`으로 바꾸는 순수 함수를 만든다.
-- [ ] `null` 선택값은 `undefined`로 바꾸고, DB의 `user_id`·`created_at`은 화면 타입에 노출하지 않는다.
-- [ ] 같은 파일의 매핑 테스트를 작성한다.
-- ▸ 완료 조건: 알려진 DB row와 폼의 정규화된 값이 기대한 `Bean`·insert row로 변환된다.
+- [ ] `libs/db/`에 집·카페 폼의 값을 DB insert row로 바꾸는 순수 매퍼를 만든다.
+- [ ] `time`을 초로, `location`을 위도·경도로 바꾸고 유형별 필드만 저장한다.
+- [ ] `libs/db/brews.ts`에 `insertBrew(input, userId)`를 추가한다.
+- [ ] `app/(main)/(private)/brews/actions.ts`의 `createBrew(input: unknown)`에서 `getUser()`를 확인하고 같은 `brewSchema`로 `safeParse`한다.
+- [ ] 집·카페 폼의 `console.log`를 저장 액션 호출로 교체한다.
+- [ ] 저장 중·필드 오류·일반 오류를 표시하고, 실패 시 입력값을 유지한다.
+- [ ] 성공 시 모달을 닫고 `/brews` 목록을 갱신한다.
+- ▸ 완료 조건: 로그인한 사용자가 집·카페 기록을 저장하고, 새로고침 후 목록과 상세에서 확인한다.
 
-2. **원두 조회 어댑터**
-
-- [ ] `libs/db/beans.ts`에 `listBeans()`와 `getBeanById(id)`만 먼저 만든다.
-- [ ] `libs/db/server.ts`의 요청별 클라이언트를 사용하고 RLS가 현재 사용자 소유권을 검사하게 둔다.
-- [ ] 화면과 목업은 아직 바꾸지 않는다.
-- ▸ 완료 조건: 타입이 지정된 Supabase query가 컴파일되고, 오류는 사용자에게 노출할 내부 상세 없이 의미 있는 오류로 바뀐다.
-
-3. **원두 추가 어댑터와 Server Action**
-
-- [ ] `libs/db/beans.ts`에 `insertBean(input, userId)`를 추가한다.
-- [ ] `app/(main)/(private)/beans/actions.ts`의 `createBean(input: unknown)`에서 `getUser()`를 확인한다.
-- [ ] 같은 `beanSchema`로 서버에서 `safeParse`하고 성공한 `parsed.data`만 저장한다.
-- ▸ 완료 조건: 비로그인 요청은 저장하지 않고, 잘못된 입력은 필드 오류로 돌아오며, 정상 입력은 RLS를 통과한 내 원두로 저장된다.
-
-4. **원두 등록 폼 연결**
-
-- [ ] `components/beans/new-bean-form.tsx`의 `console.log`를 `createBean` 호출로 교체한다.
-- [ ] 저장 중 상태, 서버 필드 오류, 일반 오류를 표시하고 실패 시 입력값을 유지한다.
-- [ ] 성공 시 모달을 닫고 `/beans` 목록을 갱신한다.
-- ▸ 완료 조건: 로그인한 사용자가 화면에서 원두 하나를 등록하고 저장 결과를 확인할 수 있다.
-
-5. **원두 목록을 DB 조회로 전환**
-
-- [ ] `app/(main)/(private)/beans/layout.tsx`에서 목업 대신 `listBeans()`를 호출한다.
-- [ ] 원두가 없을 때 현재 빈 상태 문구를 유지하고, 보관 원두 자동 전환·자동 제안은 하지 않는다.
-- ▸ 완료 조건: 방금 등록한 원두가 새로고침 후에도 목록에 보인다.
-
-6. **원두 상세와 기록 조회를 DB로 전환**
-
-- [ ] `libs/db/brews.ts`에 row ↔ `Brew` 변환과 현재 사용자 기록 조회를 추가한다.
-- [ ] `app/(main)/(private)/beans/[id]/page.tsx`에서 `getBeanById()`와 `bean_id` 기준 기록 조회를 사용한다.
-- [ ] 잔량·기록 수·평균 점수가 실제 DB 기록으로 계산되는지 확인한다.
-- ▸ 완료 조건: 다른 사용자의 ID를 URL에 넣어도 원두가 조회되지 않고, 내 원두 상세에는 연결된 기록만 보인다.
-
-7. **목업 제거와 전체 검증**
+2. **목업 제거와 전체 검증**
 
 - [ ] 목록·상세·등록의 실제 동작을 확인한 뒤에만 `libs/mocks/beans.ts`, `libs/mocks/brews.ts`를 제거한다.
 - [ ] `pnpm test`, `pnpm lint`, `pnpm exec tsc --noEmit`, 개발 서버를 종료할 수 있을 때 `pnpm build`를 실행한다.
 - [ ] 로그인 사용자 기준 모바일·데스크톱 브라우저와 RLS 소유권을 확인한다.
-
-### 인증 — 아직 남은 일
-
-- [ ] OAuth callback의 운영 canonical origin과 허용 Host 범위를 정한다. 개발용 `localhost` redirect와 분리한다.
 
 ### 원두 화면 — 아직 남은 일
 
@@ -89,15 +54,7 @@
 - [ ] **"전체 N건 보기"의 목적지**를 원두 필터(`/brews?bean=…`)로 만들지, 라벨에서 숫자를 뺄지 정한다.
 - [ ] g당 가격·한 잔 원가·소진 예상일의 표시 여부와 값 부족 시 화면 문구를 실제 DB 데이터로 확인하며 정한다.
 
-### 백엔드 붙이기
-
-폼은 다 도는데 `handleSubmit` 안이 `console.log` 다. `libs/mocks/*` 는 배열 상수라 넣을 데가 없다.
-
-**입력 검증**
-
-- [ ] 서버 액션에서 같은 `beanSchema.safeParse`를 다시 실행한다. 폼의 `zodResolver`가
-      HTML 문자열을 정규화해도 서버 입력은 신뢰하지 않는다.
-- [ ] 성공한 `parsed.data`만 저장하고, `Assert`가 여전히 `types/*.ts`를 지키는지 확인한다.
+### 이후 백엔드 작업
 
 **데이터**
 
@@ -121,17 +78,6 @@
       여기만 Supabase 를 알면 나중에 옮길 때 이 파일 하나만 바꾼다
 
 확인 — 봉투 사진을 두 크기로 만들어 40KB · 250KB 근처인지, 2000px에서 **로스터리 이름이 읽히는지**
-
-**연결**
-
-- [ ] 기록 저장도 같이
-- [ ] 저장 후 목록 갱신 — `revalidatePath` 인지 `router.refresh()` 인지
-- [ ] 서버에서만 나는 에러를 폼에 표시 (`setError`)
-- [ ] 저장 실패 시 입력값 보존 → 위 "초안 보관" 과 이어진다
-
-**확인 수단**
-
-- [ ] **서버 액션은 현재 Vitest 범위 밖이다.** 실제 로그인 브라우저와 RLS로 확인한다.
 
 ### 폼 남은 칸
 
