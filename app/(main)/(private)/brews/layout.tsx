@@ -2,9 +2,11 @@ import Link from "next/link";
 
 import BrewList from "@/components/brews/brew-list";
 import BrewPanes from "@/components/brews/brew-panes";
-import { brews } from "@/libs/mocks/brews";
+import { listBrews } from "@/libs/db/brews";
 
-export default function BrewsLayout({ children }: LayoutProps<"/brews">) {
+export default async function BrewsLayout({ children }: LayoutProps<"/brews">) {
+  const brews = await listBrews();
+
   return (
     <main className="flex min-h-0 min-w-0 flex-1 flex-col">
       <header className="flex w-full items-center justify-between border-b border-border-foreground px-4 py-2">
