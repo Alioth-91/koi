@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { toBrew } from "@/libs/db/brews";
+import { toBrew } from "@/libs/db/brew-mappers";
 import type { Database } from "@/types/supabase";
 
 type BrewRow = Database["public"]["Tables"]["brews"]["Row"];
