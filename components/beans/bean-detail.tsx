@@ -3,6 +3,7 @@ import { remainingWeight } from "@/libs/beans/calculations";
 import { cn, formatDate, formatScore } from "@/libs/utils";
 import { Bean } from "@/types/bean";
 import { HomeBrew } from "@/types/brew";
+import BeanArchiveToggle from "@/components/beans/bean-archive-toggle";
 import Link from "next/link";
 
 type BeanDetailProps = {
@@ -13,21 +14,25 @@ type BeanDetailProps = {
 export default function BeanDetail({ bean, homeBrews }: BeanDetailProps) {
   return (
     <article className="flex flex-col gap-4 p-6">
-      <header className="flex flex-col gap-2">
-        {bean.process && (
-          <span
-            className={cn(
-              "w-fit rounded-full px-2.5 py-1 text-[10.5px] font-extrabold",
-              PROCESS_BADGE[bean.process] ?? PROCESS_FALLBACK,
-            )}
-          >
-            <span className="sr-only">가공 방식 </span>
+      <header className="flex items-start justify-between gap-4">
+        <div className="flex min-w-0 flex-col gap-2">
+          {bean.process && (
+            <span
+              className={cn(
+                "w-fit rounded-full px-2.5 py-1 text-[10.5px] font-extrabold",
+                PROCESS_BADGE[bean.process] ?? PROCESS_FALLBACK,
+              )}
+            >
+              <span className="sr-only">가공 방식 </span>
 
-            {bean.process}
-          </span>
-        )}
+              {bean.process}
+            </span>
+          )}
 
-        <h2 className="text-2xl font-extrabold">{bean.name}</h2>
+          <h2 className="truncate text-2xl font-extrabold">{bean.name}</h2>
+        </div>
+
+        <BeanArchiveToggle archived={bean.archived ?? false} beanId={bean.id} />
       </header>
 
       <dl className="grid grid-cols-2 gap-x-5">

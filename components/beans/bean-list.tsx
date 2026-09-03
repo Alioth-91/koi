@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 
 import { daysSinceRoast } from "@/libs/beans/calculations";
 import { cn } from "@/libs/utils";
-import { Bean } from "@/types/bean";
+import type { Bean } from "@/types/bean";
 
 type Props = {
   beans: Bean[];
@@ -29,46 +29,73 @@ export default function BeanList({ beans }: Props) {
     );
   }
 
+  const activeBeans = beans.filter((bean) => !bean.archived);
+  const archivedBeans = beans.filter((bean) => bean.archived);
+
   return (
     <ul
       aria-label="원두 목록"
       className="relative flex min-h-0 flex-col gap-2 overflow-y-auto border-r border-border-foreground p-3"
     >
-      {beans.map((bean) => {
-        const isActive = pathName === `/beans/${bean.id}`;
-        const roastDays = daysSinceRoast(bean.roastedAt);
+      {activeBeans.map((bean) => (
+        <BeanListItem key={bean.id} bean={bean} pathName={pathName} />
+      ))}
 
-        return (
-          <li key={bean.id}>
-            <Link
-              aria-current={isActive ? "page" : undefined}
-              href={`/beans/${bean.id}`}
-              className={cn(
-                "flex items-center gap-3 rounded-2xl px-3.5 py-3 transition hover:bg-primary-tint focus-visible:ring-2 focus-visible:ring-foreground focus-visible:outline-hidden",
-                isActive && "bg-primary-tint",
-              )}
-            >
-              <span className="min-w-0 flex-1">
-                <span className="mt-0.5 block truncate font-bold">
-                  {bean.name}
-                </span>
+      {archivedBeans.length > 0 && (
+        <li className="pt-3">
+          <h2 className="border-t border-border-foreground px-3.5 pt-3 text-[11px] font-semibold tracking-wide text-muted-foreground">
+            다 사용한 원두
+          </h2>
+        </li>
+      )}
 
-                <span className="mt-0.5 block min-h-4 truncate text-xs text-subtle-foreground">
-                  {summarize(bean)}
-                </span>
-              </span>
-
-              {roastDays !== undefined && (
-                <span className="font-archivo font-extrabold">
-                  <span className="sr-only">볶은 후 지난 일수 </span>
-                  {`D+${String(roastDays).padStart(2, "0")}`}
-                </span>
-              )}
-            </Link>
-          </li>
-        );
-      })}
+      {archivedBeans.map((bean) => (
+        <BeanListItem key={bean.id} bean={bean} pathName={pathName} />
+      ))}
     </ul>
+  );
+}
+
+function BeanListItem({ bean, pathName }: { bean: Bean; pathName: string }) {
+  const isActive = pathName === `/beans/${bean.id}`;
+  const isArchived = Boolean(bean.archived);
+  const roastDays = daysSinceRoast(bean.roastedAt);
+
+  return (
+    <li>
+      <Link
+        aria-current={isActive ? "page" : undefined}
+        href={`/beans/${bean.id}`}
+        className={cn(
+          "flex items-center gap-3 rounded-2xl px-3.5 py-3 transition hover:bg-primary-tint focus-visible:ring-2 focus-visible:ring-foreground focus-visible:outline-hidden",
+          isActive && "bg-primary-tint",
+          isArchived && "opacity-60",
+        )}
+      >
+        <span className="min-w-0 flex-1">
+          <span className="mt-0.5 flex items-center gap-2 font-bold">
+            <span className="truncate">{bean.name}</span>
+
+            {isArchived && (
+              <span className="shrink-0 rounded-full bg-primary-tint px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
+                소진
+              </span>
+            )}
+          </span>
+
+          <span className="mt-0.5 block min-h-4 truncate text-xs text-subtle-foreground">
+            {summarize(bean)}
+          </span>
+        </span>
+
+        {roastDays !== undefined && (
+          <span className="font-archivo font-extrabold">
+            <span className="sr-only">볶은 후 지난 일수 </span>
+            {`D+${String(roastDays).padStart(2, "0")}`}
+          </span>
+        )}
+      </Link>
+    </li>
   );
 }
 

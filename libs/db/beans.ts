@@ -58,3 +58,21 @@ export async function insertBean(
     throw new Error("원두를 저장하지 못했습니다", { cause: error });
   }
 }
+
+/**
+ * 원두의 보유 상태를 변경한다. 소유권은 Supabase RLS가 검사한다.
+ */
+export async function updateBeanArchived(
+  id: string,
+  archived: boolean,
+): Promise<void> {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("beans")
+    .update({ archived })
+    .eq("id", id);
+
+  if (error) {
+    throw new Error("원두 상태를 변경하지 못했습니다", { cause: error });
+  }
+}
