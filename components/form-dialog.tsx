@@ -3,7 +3,7 @@
 import type { Route } from "next";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { ComponentType } from "react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import NewBeanForm from "@/components/beans/new-bean-form";
 import NewBrewForm from "@/components/brews/new-brew-form";
@@ -11,11 +11,17 @@ import { BEAN_NEW_FORM_ID, BREW_NEW_FORM_ID } from "@/libs/constants/forms";
 import { cn } from "@/libs/utils";
 
 type FormConfig = {
-  Body: ComponentType;
+  Body: ComponentType<FormBodyProps>;
   formId: string;
   panel: string;
   title: string;
 };
+
+type FormBodyProps = {
+  onSubmitDisabledChange: (disabled: boolean) => void;
+};
+
+const NewBeanFormBody: ComponentType<FormBodyProps> = () => <NewBeanForm />;
 
 const FORMS = {
   brew: {
@@ -27,7 +33,7 @@ const FORMS = {
   bean: {
     title: "원두 등록",
     formId: BEAN_NEW_FORM_ID,
-    Body: NewBeanForm,
+    Body: NewBeanFormBody,
     panel: "md:max-w-xl",
   },
 } satisfies Record<"brew" | "bean", FormConfig>;
@@ -36,6 +42,8 @@ const FORMS = {
 const TITLE_ID = "form-dialog-title";
 
 type FormKey = keyof typeof FORMS;
+
+type ActiveForm = (typeof FORMS)[FormKey];
 
 /**
  * `?form=` 값은 `string | null` 이라 그대로는 FORMS를 못 찾는다.
@@ -47,22 +55,17 @@ function isFormKey(formParam: string | null): formParam is FormKey {
   return formParam !== null && formParam in FORMS;
 }
 
-/**
- * 폼 모달
- *
- * 열림/닫힘은 쿼리스트링(`?form=brew`)으로 관리한다.
- */
-export default function FormDialog() {
-  const formParam = useSearchParams().get("form");
+type FormDialogContentProps = {
+  activeForm: ActiveForm | null;
+  close: () => void;
+};
 
-  // 좁힌 키로 맵에서 꺼낸 항목. 열지 않을 때는 null이라 아래 렌더 조건도 겸한다.
-  const activeForm = isFormKey(formParam) ? FORMS[formParam] : null;
+function FormDialogContent({ activeForm, close }: FormDialogContentProps) {
   const isOpen = activeForm !== null;
-  const pathname = usePathname();
-  const router = useRouter();
   const ref = useRef<HTMLDialogElement>(null);
-
-  const close = () => router.replace(pathname as Route);
+  const [isSubmitDisabled, setIsSubmitDisabled] = useState(
+    () => activeForm?.formId === BREW_NEW_FORM_ID,
+  );
 
   useEffect(() => {
     const dialog = ref.current;
@@ -120,7 +123,7 @@ export default function FormDialog() {
             </button>
           </header>
 
-          <activeForm.Body />
+          <activeForm.Body onSubmitDisabledChange={setIsSubmitDisabled} />
 
           {/* mt-auto — 폼이 짧아도 바닥에 붙는다. sticky — 길어지면 스크롤 위에 떠 있는다.
             저장은 <form> 밖이라 form 속성으로 잇는다. */}
@@ -134,7 +137,8 @@ export default function FormDialog() {
             </button>
 
             <button
-              className="cursor-pointer rounded-xl bg-primary px-6 py-2.5 text-sm font-bold text-primary-foreground transition-colors hover:bg-primary-hover"
+              className="cursor-pointer rounded-xl bg-primary px-6 py-2.5 text-sm font-bold text-primary-foreground transition-colors hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={isSubmitDisabled}
               form={activeForm.formId}
               type="submit"
             >
@@ -144,5 +148,28 @@ export default function FormDialog() {
         </div>
       )}
     </dialog>
+  );
+}
+
+/**
+ * 폼 모달
+ *
+ * 열림/닫힘은 쿼리스트링(`?form=brew`)으로 관리한다.
+ */
+export default function FormDialog() {
+  const formParam = useSearchParams().get("form");
+
+  // 좁힌 키로 맵에서 꺼낸 항목. 열지 않을 때는 null이라 아래 렌더 조건도 겸한다.
+  const activeForm = isFormKey(formParam) ? FORMS[formParam] : null;
+  const pathname = usePathname();
+  const router = useRouter();
+  const close = () => router.replace(pathname as Route);
+
+  return (
+    <FormDialogContent
+      activeForm={activeForm}
+      close={close}
+      key={formParam ?? "closed"}
+    />
   );
 }
