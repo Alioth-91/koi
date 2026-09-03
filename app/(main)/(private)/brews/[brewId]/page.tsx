@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { cache } from "react";
 
 import BrewDetail from "@/components/brews/brew-detail";
+import { getBeanById } from "@/libs/db/beans";
 import { getBrewById } from "@/libs/db/brews";
 import { formatDate } from "@/libs/utils";
 
@@ -37,5 +38,8 @@ export default async function BrewDetailPage({
   // notFound()는 반환하지 않고 렌더를 끊는다 — 이 줄 아래로는 brew가 undefined일 수 없다.
   if (!brew) notFound();
 
-  return <BrewDetail brew={brew} />;
+  const bean =
+    brew.type === "home" && brew.beanId ? await getBeanById(brew.beanId) : null;
+
+  return <BrewDetail bean={bean} brew={brew} />;
 }

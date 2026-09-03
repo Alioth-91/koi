@@ -1,6 +1,8 @@
 import CafeStaticMap from "@/components/brews/cafe-static-map";
+import { cupCost } from "@/libs/beans/calculations";
 import { cn, formatDate, formatScore } from "@/libs/utils";
-import { Brew } from "@/types/brew";
+import type { Bean } from "@/types/bean";
+import type { Brew } from "@/types/brew";
 
 const SENSORY = [
   ["acidity", "산미", "bg-acidity"],
@@ -10,7 +12,12 @@ const SENSORY = [
   ["aftertaste", "여운", "bg-aftertaste"],
 ] as const;
 
-export default function BrewDetail({ brew }: { brew: Brew }) {
+type BrewDetailProps = {
+  bean: Bean | null;
+  brew: Brew;
+};
+
+export default function BrewDetail({ bean, brew }: BrewDetailProps) {
   const bars = SENSORY.map(([key, label, color]) => ({
     label,
     color,
@@ -40,7 +47,7 @@ export default function BrewDetail({ brew }: { brew: Brew }) {
       </header>
 
       <dl className="grid grid-cols-2 gap-x-5">
-        {rowsOf(brew).map(([label, value]) => (
+        {rowsOf(brew, bean).map(([label, value]) => (
           <div
             key={label}
             className="flex items-baseline justify-between border-b border-border-foreground py-2 text-xs"
@@ -109,7 +116,7 @@ export default function BrewDetail({ brew }: { brew: Brew }) {
 }
 
 // 빈 항목은 행째 빠진다.
-function rowsOf(brew: Brew) {
+function rowsOf(brew: Brew, bean: Bean | null) {
   const entries: [string, string | undefined][] =
     brew.type === "home"
       ? [
@@ -118,6 +125,7 @@ function rowsOf(brew: Brew) {
           ["원두", brew.dose ? `${brew.dose}g` : undefined],
           ["물", brew.water ? `${brew.water}g` : undefined],
           ["시간", brew.time],
+          ["한 잔 원가", cupCostLabel(bean, brew.dose)],
         ]
       : [
           ["메뉴", brew.menu],
@@ -128,7 +136,15 @@ function rowsOf(brew: Brew) {
   return entries.filter(([, value]) => value);
 }
 
-// 저장하지 않고 두 값에서 계산한다 (명세 3.2).
+function cupCostLabel(bean: Bean | null, dose?: number) {
+  const cost = cupCost(bean?.price, bean?.weight, dose);
+
+  return cost === undefined
+    ? undefined
+    : `${Math.round(cost).toLocaleString("ko-KR")}원`;
+}
+
+// 저장하지 않고 두 값에서 계산한다.
 function ratioOf(dose?: number, water?: number) {
   if (!dose || !water) return undefined;
 
