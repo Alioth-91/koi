@@ -1,6 +1,10 @@
 import * as z from "zod";
 
-import { toBrew } from "@/libs/db/brew-mappers";
+import {
+  toBrew,
+  toBrewInsert,
+  type ResolvedBrewForm,
+} from "@/libs/db/brew-mappers";
 import { createClient } from "@/libs/db/server";
 import type { Brew, HomeBrew } from "@/types/brew";
 import type { Database } from "@/types/supabase";
@@ -13,6 +17,24 @@ type BrewRow = Database["public"]["Tables"]["brews"]["Row"];
 
 const brewIdSchema = z.uuid();
 const BREW_LOAD_ERROR = "기록을 불러오지 못했습니다";
+const BREW_SAVE_ERROR = "기록을 저장하지 못했습니다";
+
+/**
+ * 서버에서 원두 연결을 확인한 기록을 로그인한 사용자의 기록으로 저장한다.
+ */
+export async function insertBrew(
+  input: ResolvedBrewForm,
+  userId: string,
+): Promise<void> {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("brews")
+    .insert(toBrewInsert(input, userId));
+
+  if (error) {
+    throw new Error(BREW_SAVE_ERROR, { cause: error });
+  }
+}
 
 /**
  * 로그인한 사용자의 모든 기록을 최신 날짜순으로 조회한다.

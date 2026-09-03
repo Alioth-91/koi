@@ -1,8 +1,14 @@
+import type { BrewForm } from "@/libs/schemas/brew";
 import type { Database } from "@/types/supabase";
 import type { Brew, CafeBrew, HomeBrew } from "@/types/brew";
 
 type BrewRow = Database["public"]["Tables"]["brews"]["Row"];
+type BrewInsert = Database["public"]["Tables"]["brews"]["Insert"];
 type SensoryScore = Brew["sensory"][keyof Brew["sensory"]];
+
+export type ResolvedBrewForm =
+  | (Extract<BrewForm, { type: "home" }> & { beanName: string })
+  | Extract<BrewForm, { type: "cafe" }>;
 
 /**
  * DB row의 snake_case 필드와 저장 형식을 화면용 Brew로 바꾼다.
@@ -63,6 +69,66 @@ export function toBrew(row: BrewRow): Brew {
   throw new Error("지원하지 않는 기록 유형입니다");
 }
 
+/**
+ * 서버에서 원두 연결을 확인한 폼 값을 DB insert row로 바꾼다.
+ * beanName은 브라우저 입력이 아니라 서버가 원두 row에서 읽은 스냅샷이다.
+ */
+export function toBrewInsert(
+  input: ResolvedBrewForm,
+  userId: string,
+): BrewInsert {
+  const common = {
+    acidity: input.sensory.acidity,
+    aftertaste: input.sensory.aftertaste,
+    bitterness: input.sensory.bitterness,
+    body: input.sensory.body,
+    date: input.date,
+    memo: input.memo ?? null,
+    score: input.score,
+    sweetness: input.sensory.sweetness,
+    type: input.type,
+    user_id: userId,
+  };
+
+  if (input.type === "home") {
+    return {
+      ...common,
+      address: null,
+      bean_id: input.beanId,
+      bean_name: input.beanName,
+      cafe_name: null,
+      dose: input.dose ?? null,
+      duration_seconds: toDurationSeconds(input.time),
+      lat: null,
+      lng: null,
+      menu: null,
+      method: input.method ?? null,
+      price: null,
+      temperature: null,
+      water: input.water ?? null,
+      water_temp: input.waterTemp ?? null,
+    };
+  }
+
+  return {
+    ...common,
+    address: input.address ?? null,
+    bean_id: null,
+    bean_name: null,
+    cafe_name: input.cafeName,
+    dose: null,
+    duration_seconds: null,
+    lat: input.location?.lat ?? null,
+    lng: input.location?.lng ?? null,
+    menu: input.menu ?? null,
+    method: null,
+    price: input.price ?? null,
+    temperature: input.temperature ?? null,
+    water: null,
+    water_temp: null,
+  };
+}
+
 function toSensoryScore(value: number): SensoryScore {
   if (!Number.isInteger(value) || value < 0 || value > 5) {
     throw new Error("유효하지 않은 감각 점수입니다");
@@ -85,4 +151,21 @@ function toTime(seconds: number | null): string | undefined {
   }
 
   return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
+}
+
+function toDurationSeconds(time: string | undefined): number | null {
+  if (time === undefined) return null;
+
+  const [minutes, seconds] = time.split(":").map(Number);
+  if (
+    !Number.isInteger(minutes) ||
+    minutes < 0 ||
+    !Number.isInteger(seconds) ||
+    seconds < 0 ||
+    seconds > 59
+  ) {
+    throw new Error("유효하지 않은 추출 시간입니다");
+  }
+
+  return minutes * 60 + seconds;
 }
