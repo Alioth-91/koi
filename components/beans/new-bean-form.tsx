@@ -63,7 +63,6 @@ export default function NewBeanForm() {
       return;
     }
 
-    router.refresh();
     router.replace("/beans");
   });
 

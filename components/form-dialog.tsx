@@ -2,6 +2,7 @@
 
 import type { Route } from "next";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import type { ComponentType } from "react";
 import { useEffect, useRef } from "react";
 
 import NewBeanForm from "@/components/beans/new-bean-form";
@@ -9,11 +10,12 @@ import NewBrewForm from "@/components/brews/new-brew-form";
 import { BEAN_NEW_FORM_ID, BREW_NEW_FORM_ID } from "@/libs/constants/forms";
 import { cn } from "@/libs/utils";
 
-/**
- * 폼 모달
- *
- * 열림/닫힘은 쿼리스트링(`?form=brew`)으로 관리한다.
- */
+type FormConfig = {
+  Body: ComponentType;
+  formId: string;
+  panel: string;
+  title: string;
+};
 
 const FORMS = {
   brew: {
@@ -28,7 +30,7 @@ const FORMS = {
     Body: NewBeanForm,
     panel: "md:max-w-xl",
   },
-} as const;
+} satisfies Record<"brew" | "bean", FormConfig>;
 
 /** <dialog aria-labelledby> 가 가리킬 제목. 열려 있는 폼이 하나뿐이라 상수로 둔다. */
 const TITLE_ID = "form-dialog-title";
@@ -45,6 +47,11 @@ function isFormKey(formParam: string | null): formParam is FormKey {
   return formParam !== null && formParam in FORMS;
 }
 
+/**
+ * 폼 모달
+ *
+ * 열림/닫힘은 쿼리스트링(`?form=brew`)으로 관리한다.
+ */
 export default function FormDialog() {
   const formParam = useSearchParams().get("form");
 
