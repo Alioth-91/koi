@@ -1,10 +1,12 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import * as z from "zod";
 
-import { insertBean } from "@/libs/db/beans";
+import { insertBean, listBeans } from "@/libs/db/beans";
 import { createClient } from "@/libs/db/server";
 import { beanSchema, type BeanForm } from "@/libs/schemas/bean";
+import type { Bean } from "@/types/bean";
 
 type BeanFieldErrors = Partial<Record<keyof BeanForm, string[]>>;
 
@@ -12,6 +14,20 @@ export type BeanActionState = {
   errors?: BeanFieldErrors;
   errorMessage?: string;
 };
+
+/** 기록 폼이 열릴 때 현재 사용자의 원두 목록을 조회한다. */
+export async function loadBeans(): Promise<Bean[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.getUser();
+
+  if (error) {
+    throw new Error("원두 목록을 불러오지 못했습니다", { cause: error });
+  }
+
+  if (!data.user) return [];
+
+  return listBeans();
+}
 
 export async function createBean(input: unknown): Promise<BeanActionState> {
   try {
@@ -36,6 +52,7 @@ export async function createBean(input: unknown): Promise<BeanActionState> {
     }
 
     await insertBean(parsed.data, data.user.id);
+    revalidatePath("/(main)/(private)/beans", "layout");
   } catch (error) {
     console.error("원두 저장 중 예상하지 못한 오류가 발생했습니다", error);
 
