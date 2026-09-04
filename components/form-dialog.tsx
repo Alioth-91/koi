@@ -3,12 +3,12 @@
 import type { Route } from "next";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { ComponentType } from "react";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 
 import NewBeanForm from "@/components/beans/new-bean-form";
 import NewBrewForm from "@/components/brews/new-brew-form";
+import Modal from "@/components/modal";
 import { BEAN_NEW_FORM_ID, BREW_NEW_FORM_ID } from "@/libs/constants/forms";
-import { cn } from "@/libs/utils";
 
 type FormConfig = {
   Body: ComponentType<FormBodyProps>;
@@ -38,9 +38,6 @@ const FORMS = {
   },
 } satisfies Record<"brew" | "bean", FormConfig>;
 
-/** <dialog aria-labelledby> 가 가리킬 제목. 열려 있는 폼이 하나뿐이라 상수로 둔다. */
-const TITLE_ID = "form-dialog-title";
-
 type FormKey = keyof typeof FORMS;
 
 type ActiveForm = (typeof FORMS)[FormKey];
@@ -61,68 +58,21 @@ type FormDialogContentProps = {
 };
 
 function FormDialogContent({ activeForm, close }: FormDialogContentProps) {
-  const isOpen = activeForm !== null;
-  const ref = useRef<HTMLDialogElement>(null);
   const [isSubmitDisabled, setIsSubmitDisabled] = useState(
     () => activeForm?.formId === BREW_NEW_FORM_ID,
   );
 
-  useEffect(() => {
-    const dialog = ref.current;
-
-    if (!dialog) return;
-
-    if (isOpen && !dialog.open) dialog.showModal();
-    if (!isOpen && dialog.open) dialog.close();
-
-    const locked = [document.documentElement, document.body];
-
-    for (const el of locked) {
-      el.classList.toggle("overflow-hidden", isOpen);
-      el.classList.toggle("overscroll-none", isOpen);
-    }
-
-    return () => {
-      for (const el of locked) {
-        el.classList.remove("overflow-hidden", "overscroll-none");
-      }
-    };
-  }, [isOpen]);
+  const isOpen = activeForm !== null;
 
   return (
-    <dialog
-      aria-labelledby={TITLE_ID}
-      className={cn(
-        "m-auto h-dvh max-h-none w-full max-w-none overflow-y-auto overscroll-contain bg-background backdrop:bg-overlay md:max-h-4/5 md:w-[calc(100%-4rem)] md:rounded-2xl",
-        activeForm?.panel,
-      )}
-      onClick={(e) => {
-        if (e.target === e.currentTarget) close();
-      }}
-
-      onCancel={(e) => {
-        e.preventDefault();
-        close();
-      }}
-      ref={ref}
+    <Modal
+      className={activeForm?.panel}
+      isOpen={isOpen}
+      onClose={close}
+      title={activeForm?.title ?? ""}
     >
       {activeForm && (
-        <div className="flex min-h-full flex-col">
-          <header className="flex items-center justify-between p-4">
-            <h2 className="text-lg font-extrabold" id={TITLE_ID}>
-              {activeForm.title}
-            </h2>
-
-            <button
-              aria-label="닫기"
-              className="rounded-lg px-2 py-1 text-muted-foreground transition-colors hover:bg-primary-tint"
-              onClick={close}
-              type="button"
-            >
-              ✕
-            </button>
-          </header>
-
+        <>
           <activeForm.Body onSubmitDisabledChange={setIsSubmitDisabled} />
 
           {/* mt-auto — 폼이 짧아도 바닥에 붙는다. sticky — 길어지면 스크롤 위에 떠 있는다.
@@ -145,9 +95,9 @@ function FormDialogContent({ activeForm, close }: FormDialogContentProps) {
               저장
             </button>
           </footer>
-        </div>
+        </>
       )}
-    </dialog>
+    </Modal>
   );
 }
 

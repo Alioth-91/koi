@@ -1,10 +1,11 @@
 import { PROCESS_BADGE, PROCESS_FALLBACK } from "@/libs/constants/beans";
 import { remainingWeight } from "@/libs/beans/calculations";
 import { cn, formatDate, formatScore } from "@/libs/utils";
-import { Bean } from "@/types/bean";
-import { HomeBrew } from "@/types/brew";
 import BeanArchiveToggle from "@/components/beans/bean-archive-toggle";
+import BeanDeleteButton from "@/components/beans/bean-delete-button";
 import Link from "next/link";
+import type { Bean } from "@/types/bean";
+import type { HomeBrew } from "@/types/brew";
 
 type BeanDetailProps = {
   bean: Bean;
@@ -32,7 +33,13 @@ export default function BeanDetail({ bean, homeBrews }: BeanDetailProps) {
           <h2 className="truncate text-2xl font-extrabold">{bean.name}</h2>
         </div>
 
-        <BeanArchiveToggle archived={bean.archived ?? false} beanId={bean.id} />
+        <div className="flex shrink-0 items-start gap-2">
+          <BeanArchiveToggle
+            archived={bean.archived ?? false}
+            beanId={bean.id}
+          />
+          <BeanDeleteButton beanName={bean.name} />
+        </div>
       </header>
 
       <dl className="grid grid-cols-2 gap-x-5">
