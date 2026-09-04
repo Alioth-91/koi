@@ -3,6 +3,7 @@ import { remainingWeight } from "@/libs/beans/calculations";
 import { cn, formatDate, formatScore } from "@/libs/utils";
 import BeanArchiveToggle from "@/components/beans/bean-archive-toggle";
 import BeanDeleteModal from "@/components/beans/bean-delete-modal";
+import BeanEditModal from "@/components/beans/bean-edit-modal";
 import Link from "next/link";
 import type { Bean } from "@/types/bean";
 import type { HomeBrew } from "@/types/brew";
@@ -34,10 +35,13 @@ export default function BeanDetail({ bean, homeBrews }: BeanDetailProps) {
         </div>
 
         <div className="flex shrink-0 items-start gap-2">
+          <BeanEditModal bean={bean} />
+
           <BeanArchiveToggle
             archived={bean.archived ?? false}
             beanId={bean.id}
           />
+
           <BeanDeleteModal beanId={bean.id} beanName={bean.name} />
         </div>
       </header>

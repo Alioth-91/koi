@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { toBean, toBeanInsert } from "@/libs/db/bean-mappers";
+import { toBean, toBeanInsert, toBeanUpdate } from "@/libs/db/bean-mappers";
 import type { Database } from "@/types/supabase";
 
 type BeanRow = Database["public"]["Tables"]["beans"]["Row"];
@@ -99,6 +99,42 @@ describe("toBeanInsert", () => {
       roasted_at: null,
       roastery: null,
       user_id: "user-1",
+      weight: null,
+    });
+  });
+});
+
+describe("toBeanUpdate", () => {
+  it("화면용 입력을 DB update row로 바꾸고 archived는 포함하지 않는다", () => {
+    expect(
+      toBeanUpdate({
+        name: "예가체프",
+        price: 18000,
+        process: "워시드",
+        roastLevel: "라이트",
+        roastedAt: "2026-08-28",
+        roastery: "펠트 커피",
+        weight: 200,
+      }),
+    ).toStrictEqual({
+      name: "예가체프",
+      price: 18000,
+      process: "워시드",
+      roast_level: "라이트",
+      roasted_at: "2026-08-28",
+      roastery: "펠트 커피",
+      weight: 200,
+    });
+  });
+
+  it("비어 있는 선택값은 DB에서 null로 갱신한다", () => {
+    expect(toBeanUpdate({ name: "케냐 AA" })).toStrictEqual({
+      name: "케냐 AA",
+      price: null,
+      process: null,
+      roast_level: null,
+      roasted_at: null,
+      roastery: null,
       weight: null,
     });
   });

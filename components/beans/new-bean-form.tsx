@@ -1,16 +1,18 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
-import { createBean } from "@/app/(main)/(private)/beans/actions";
+import { createBean, updateBean } from "@/app/(main)/(private)/beans/actions";
 import FieldCard from "@/components/brews/field-card";
 import { PROCESSES, ROAST_LEVELS } from "@/libs/constants/beans";
 import { BEAN_NEW_FORM_ID } from "@/libs/constants/forms";
 import { beanSchema, type BeanForm } from "@/libs/schemas/bean";
+import type { Bean } from "@/types/bean";
 
 /**
- * 원두 등록 폼
+ * 원두 등록·수정 폼
  */
 const PROCESS_LIST_ID = "bean-process-list";
 const ROAST_LEVEL_LIST_ID = "bean-roast-level-list";
@@ -24,7 +26,19 @@ const BEAN_FIELDS = [
   "price",
 ] as const satisfies ReadonlyArray<keyof BeanForm>;
 
-export default function NewBeanForm() {
+type NewBeanFormProps = {
+  bean?: Bean;
+  formId?: string;
+  onSubmitDisabledChange?: (disabled: boolean) => void;
+  onSuccess?: () => void;
+};
+
+export default function NewBeanForm({
+  bean,
+  formId = BEAN_NEW_FORM_ID,
+  onSubmitDisabledChange,
+  onSuccess,
+}: NewBeanFormProps) {
   const router = useRouter();
   const {
     clearErrors,
@@ -36,13 +50,32 @@ export default function NewBeanForm() {
     z.input<typeof beanSchema>, // 폼이 들고 있는 값 — 빈 칸은 ""
     unknown,
     z.output<typeof beanSchema> // handleSubmit이 주는 값 — 빈 칸은 undefined
-  >({ resolver: zodResolver(beanSchema) });
+  >({
+    defaultValues: bean
+      ? {
+          name: bean.name,
+          price: bean.price ?? "",
+          process: bean.process ?? "",
+          roastLevel: bean.roastLevel ?? "",
+          roastedAt: bean.roastedAt ?? "",
+          roastery: bean.roastery ?? "",
+          weight: bean.weight ?? "",
+        }
+      : undefined,
+    resolver: zodResolver(beanSchema),
+  });
+
+  useEffect(() => {
+    onSubmitDisabledChange?.(isSubmitting);
+  }, [isSubmitting, onSubmitDisabledChange]);
 
   const onSubmit = handleSubmit(async (values) => {
     // 이전 실패 메시지가 다음 시도에도 남지 않게 하는 목적
     clearErrors("root.server");
 
-    const result = await createBean(values);
+    const result = bean
+      ? await updateBean({ beanId: bean.id, ...values })
+      : await createBean(values);
 
     for (const field of BEAN_FIELDS) {
       const message = result.errors?.[field]?.[0];
@@ -63,14 +96,18 @@ export default function NewBeanForm() {
       return;
     }
 
-    router.replace("/beans");
+    if (onSuccess) {
+      onSuccess();
+    } else {
+      router.replace("/beans");
+    }
   });
 
   return (
     <form
       aria-busy={isSubmitting}
       className="flex flex-1 flex-col gap-2.5 p-6"
-      id={BEAN_NEW_FORM_ID}
+      id={formId}
       noValidate
       onSubmit={onSubmit}
     >

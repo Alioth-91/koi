@@ -6,3 +6,4 @@
  */
 export const BREW_NEW_FORM_ID = "brew-new-form";
 export const BEAN_NEW_FORM_ID = "bean-new-form";
+export const BEAN_EDIT_FORM_ID = "bean-edit-form";

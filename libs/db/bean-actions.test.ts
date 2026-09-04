@@ -6,6 +6,7 @@ const mocks = vi.hoisted(() => ({
   insertBean: vi.fn(),
   listBeans: vi.fn(),
   revalidatePath: vi.fn(),
+  updateBeanById: vi.fn(),
   updateBeanArchived: vi.fn(),
 }));
 
@@ -17,6 +18,7 @@ vi.mock("@/libs/db/beans", () => ({
   deleteBeanById: mocks.deleteBeanById,
   insertBean: mocks.insertBean,
   listBeans: mocks.listBeans,
+  updateBeanById: mocks.updateBeanById,
   updateBeanArchived: mocks.updateBeanArchived,
 }));
 
@@ -30,6 +32,7 @@ import {
   createBean,
   deleteBean as deleteBeanAction,
   loadBeans,
+  updateBean as updateBeanAction,
   updateBeanArchived as updateBeanArchivedAction,
 } from "@/app/(main)/(private)/beans/actions";
 
@@ -43,6 +46,7 @@ describe("createBean", () => {
     });
     mocks.insertBean.mockResolvedValue(undefined);
     mocks.listBeans.mockResolvedValue([]);
+    mocks.updateBeanById.mockResolvedValue(undefined);
     mocks.updateBeanArchived.mockResolvedValue(undefined);
   });
 
@@ -70,6 +74,31 @@ describe("createBean", () => {
     ).resolves.toStrictEqual({});
 
     expect(mocks.updateBeanArchived).toHaveBeenCalledWith(beanId, true);
+    expect(mocks.revalidatePath).toHaveBeenNthCalledWith(
+      1,
+      "/(main)/(private)/beans",
+      "layout",
+    );
+    expect(mocks.revalidatePath).toHaveBeenNthCalledWith(2, `/beans/${beanId}`);
+  });
+
+  it("원두 정보 수정 성공 후 목록과 상세를 갱신한다", async () => {
+    const beanId = "024fc61d-5919-4031-9271-0ccf9a6a1af0";
+
+    await expect(
+      updateBeanAction({
+        beanId,
+        name: "새 원두 이름",
+        price: "21000",
+        weight: "200",
+      }),
+    ).resolves.toStrictEqual({});
+
+    expect(mocks.updateBeanById).toHaveBeenCalledWith(beanId, {
+      name: "새 원두 이름",
+      price: 21000,
+      weight: 200,
+    });
     expect(mocks.revalidatePath).toHaveBeenNthCalledWith(
       1,
       "/(main)/(private)/beans",

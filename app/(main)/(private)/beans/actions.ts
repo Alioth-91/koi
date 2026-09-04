@@ -7,6 +7,7 @@ import {
   deleteBeanById,
   insertBean,
   listBeans,
+  updateBeanById,
   updateBeanArchived as updateBeanArchivedInDb,
 } from "@/libs/db/beans";
 import { createClient } from "@/libs/db/server";
@@ -21,6 +22,10 @@ const beanArchiveSchema = z.object({
 });
 
 const beanDeleteSchema = z.object({
+  beanId: z.uuid(),
+});
+
+const beanUpdateSchema = beanSchema.extend({
   beanId: z.uuid(),
 });
 
@@ -72,6 +77,46 @@ export async function createBean(input: unknown): Promise<BeanActionState> {
 
     return {
       errorMessage: "원두를 저장하지 못했습니다. 잠시 후 다시 시도해주세요",
+    };
+  }
+
+  return {};
+}
+
+export async function updateBean(input: unknown): Promise<BeanActionState> {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase.auth.getUser();
+
+    if (error) {
+      console.error("원두 수정 전 사용자 확인에 실패했습니다", error);
+
+      return {
+        errorMessage: "로그인 상태를 확인하지 못했습니다. 다시 시도해주세요",
+      };
+    }
+
+    if (!data.user) {
+      return { errorMessage: "로그인 후 원두를 수정해주세요" };
+    }
+
+    const parsed = beanUpdateSchema.safeParse(input);
+
+    if (!parsed.success) {
+      return { errors: z.flattenError(parsed.error).fieldErrors };
+    }
+
+    const { beanId, ...beanInput } = parsed.data;
+
+    await updateBeanById(beanId, beanInput);
+
+    revalidatePath("/(main)/(private)/beans", "layout");
+    revalidatePath(`/beans/${beanId}`);
+  } catch (error) {
+    console.error("원두 수정 중 예상하지 못한 오류가 발생했습니다", error);
+
+    return {
+      errorMessage: "원두를 수정하지 못했습니다. 잠시 후 다시 시도해주세요",
     };
   }
 

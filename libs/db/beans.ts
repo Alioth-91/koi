@@ -1,4 +1,4 @@
-import { toBean, toBeanInsert } from "@/libs/db/bean-mappers";
+import { toBean, toBeanInsert, toBeanUpdate } from "@/libs/db/bean-mappers";
 import { createClient } from "@/libs/db/server";
 import type { BeanForm } from "@/libs/schemas/bean";
 import type { Bean } from "@/types/bean";
@@ -56,6 +56,24 @@ export async function insertBean(
 
   if (error) {
     throw new Error("원두를 저장하지 못했습니다", { cause: error });
+  }
+}
+
+/**
+ * 원두 정보를 수정한다. archived는 별도 액션에서만 변경한다.
+ */
+export async function updateBeanById(
+  id: string,
+  input: BeanForm,
+): Promise<void> {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("beans")
+    .update(toBeanUpdate(input))
+    .eq("id", id);
+
+  if (error) {
+    throw new Error("원두를 수정하지 못했습니다", { cause: error });
   }
 }
 

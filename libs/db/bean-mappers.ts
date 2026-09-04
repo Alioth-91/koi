@@ -3,6 +3,7 @@ import type { Database } from "@/types/supabase";
 
 type BeanRow = Database["public"]["Tables"]["beans"]["Row"];
 type BeanInsert = Database["public"]["Tables"]["beans"]["Insert"];
+type BeanUpdate = Database["public"]["Tables"]["beans"]["Update"];
 type BeanInput = Pick<
   Bean,
   | "name"
@@ -37,6 +38,18 @@ export function toBeanInsert(input: BeanInput, userId: string): BeanInsert {
     roasted_at: input.roastedAt ?? null,
     roastery: input.roastery ?? null,
     user_id: userId,
+    weight: input.weight ?? null,
+  };
+}
+
+export function toBeanUpdate(input: BeanInput): BeanUpdate {
+  return {
+    name: input.name,
+    price: input.price ?? null,
+    process: input.process ?? null,
+    roast_level: input.roastLevel ?? null,
+    roasted_at: input.roastedAt ?? null,
+    roastery: input.roastery ?? null,
     weight: input.weight ?? null,
   };
 }
