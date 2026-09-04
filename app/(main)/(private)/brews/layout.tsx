@@ -1,11 +1,13 @@
 import Link from "next/link";
+import { Suspense } from "react";
 
 import BrewList from "@/components/brews/brew-list";
 import BrewPanes from "@/components/brews/brew-panes";
+import { listBeans } from "@/libs/db/beans";
 import { listBrews } from "@/libs/db/brews";
 
 export default async function BrewsLayout({ children }: LayoutProps<"/brews">) {
-  const brews = await listBrews();
+  const [brews, beans] = await Promise.all([listBrews(), listBeans()]);
 
   return (
     <main className="flex min-h-0 min-w-0 flex-1 flex-col">
@@ -27,7 +29,20 @@ export default async function BrewsLayout({ children }: LayoutProps<"/brews">) {
       </header>
 
       {/* 목록은 레이아웃에 둔다 — 하위 라우트가 바뀌어도 다시 그려지지 않는다. */}
-      <BrewPanes list={<BrewList brews={brews} />} detail={children} />
+      <BrewPanes
+        list={
+          <Suspense
+            fallback={
+              <div className="flex min-h-0 items-center justify-center border-r border-border-foreground p-6 text-sm text-muted-foreground">
+                기록을 불러오는 중...
+              </div>
+            }
+          >
+            <BrewList beans={beans} brews={brews} />
+          </Suspense>
+        }
+        detail={children}
+      />
     </main>
   );
 }

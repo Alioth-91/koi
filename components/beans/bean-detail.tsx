@@ -67,10 +67,10 @@ export default function BeanDetail({ bean, homeBrews }: BeanDetailProps) {
 
           {!!homeBrews.length && (
             <Link
-              href="/brews"
+              href={`/brews?bean=${bean.id}`}
               className="text-[11px] tracking-widest text-muted-foreground"
             >
-              전체 {homeBrews.length}건 보기
+              이 원두 기록 보기
             </Link>
           )}
         </div>
