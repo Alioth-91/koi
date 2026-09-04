@@ -76,3 +76,15 @@ export async function updateBeanArchived(
     throw new Error("원두 상태를 변경하지 못했습니다", { cause: error });
   }
 }
+
+/**
+ * 원두를 삭제한다. 삭제 권한은 Supabase RLS가 검사한다.
+ */
+export async function deleteBeanById(id: string): Promise<void> {
+  const supabase = await createClient();
+  const { error } = await supabase.from("beans").delete().eq("id", id);
+
+  if (error) {
+    throw new Error("원두를 삭제하지 못했습니다", { cause: error });
+  }
+}

@@ -1,26 +1,54 @@
 "use client";
 
-import { useState } from "react";
+import { deleteBean } from "@/app/(main)/(private)/beans/actions";
+import { useRouter } from "next/navigation";
+import { useState, useTransition } from "react";
 
 import Modal from "@/components/modal";
 
-type BeanDeleteButtonProps = {
+type BeanDeleteModalProps = {
+  beanId: string;
   beanName: string;
 };
 
-/** 삭제 액션을 연결하기 전까지는 확인 모달의 모양과 닫기 흐름만 제공한다. */
-export default function BeanDeleteButton({ beanName }: BeanDeleteButtonProps) {
+export default function BeanDeleteModal({
+  beanId,
+  beanName,
+}: BeanDeleteModalProps) {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
+  const [errorMessage, setErrorMessage] = useState("");
 
   function close() {
     setIsOpen(false);
+  }
+
+  function open() {
+    setErrorMessage("");
+    setIsOpen(true);
+  }
+
+  function handleDelete() {
+    setErrorMessage("");
+
+    startTransition(async () => {
+      const result = await deleteBean({ beanId });
+
+      if (result.errorMessage) {
+        setErrorMessage(result.errorMessage);
+        return;
+      }
+
+      router.replace("/beans");
+    });
   }
 
   return (
     <>
       <button
         className="rounded-xl border border-border-foreground px-3 py-2 text-xs font-bold text-destructive transition-colors hover:border-destructive hover:bg-destructive/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-destructive"
-        onClick={() => setIsOpen(true)}
+        onClick={open}
         type="button"
       >
         삭제
@@ -44,11 +72,16 @@ export default function BeanDeleteButton({ beanName }: BeanDeleteButtonProps) {
               삭제한 원두는 다시 복구할 수 없어요. 이 원두로 남긴 기록은 그대로
               남아요.
             </p>
+
+            <p aria-live="polite" className="mt-3 min-h-5 text-destructive">
+              {errorMessage}
+            </p>
           </section>
 
           <footer className="flex justify-end gap-4 bg-background px-6 py-4">
             <button
               className="cursor-pointer rounded-xl border border-border-foreground px-6 py-2.5 text-sm font-bold transition-colors hover:bg-primary-tint"
+              disabled={isPending}
               onClick={close}
               type="button"
             >
@@ -56,11 +89,12 @@ export default function BeanDeleteButton({ beanName }: BeanDeleteButtonProps) {
             </button>
 
             <button
-              className="text-destructive-foreground cursor-not-allowed rounded-xl bg-destructive px-6 py-2.5 text-sm font-bold opacity-50"
-              disabled
+              className="cursor-pointer rounded-xl bg-destructive px-6 py-2.5 text-sm font-bold text-white transition-colors hover:bg-destructive/90 disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={isPending}
+              onClick={handleDelete}
               type="button"
             >
-              삭제
+              {isPending ? "삭제 중..." : "삭제"}
             </button>
           </footer>
         </div>

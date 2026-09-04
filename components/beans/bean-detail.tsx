@@ -2,7 +2,7 @@ import { PROCESS_BADGE, PROCESS_FALLBACK } from "@/libs/constants/beans";
 import { remainingWeight } from "@/libs/beans/calculations";
 import { cn, formatDate, formatScore } from "@/libs/utils";
 import BeanArchiveToggle from "@/components/beans/bean-archive-toggle";
-import BeanDeleteButton from "@/components/beans/bean-delete-button";
+import BeanDeleteModal from "@/components/beans/bean-delete-modal";
 import Link from "next/link";
 import type { Bean } from "@/types/bean";
 import type { HomeBrew } from "@/types/brew";
@@ -38,7 +38,7 @@ export default function BeanDetail({ bean, homeBrews }: BeanDetailProps) {
             archived={bean.archived ?? false}
             beanId={bean.id}
           />
-          <BeanDeleteButton beanName={bean.name} />
+          <BeanDeleteModal beanId={bean.id} beanName={bean.name} />
         </div>
       </header>
 

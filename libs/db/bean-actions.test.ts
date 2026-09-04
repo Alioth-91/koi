@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
+  deleteBeanById: vi.fn(),
   getUser: vi.fn(),
   insertBean: vi.fn(),
   listBeans: vi.fn(),
@@ -13,6 +14,7 @@ vi.mock("next/cache", () => ({
 }));
 
 vi.mock("@/libs/db/beans", () => ({
+  deleteBeanById: mocks.deleteBeanById,
   insertBean: mocks.insertBean,
   listBeans: mocks.listBeans,
   updateBeanArchived: mocks.updateBeanArchived,
@@ -26,6 +28,7 @@ vi.mock("@/libs/db/server", () => ({
 
 import {
   createBean,
+  deleteBean as deleteBeanAction,
   loadBeans,
   updateBeanArchived as updateBeanArchivedAction,
 } from "@/app/(main)/(private)/beans/actions";
@@ -33,6 +36,7 @@ import {
 describe("createBean", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.deleteBeanById.mockResolvedValue(undefined);
     mocks.getUser.mockResolvedValue({
       data: { user: { id: "user-1" } },
       error: null,
@@ -72,5 +76,39 @@ describe("createBean", () => {
       "layout",
     );
     expect(mocks.revalidatePath).toHaveBeenNthCalledWith(2, `/beans/${beanId}`);
+  });
+
+  it("원두 삭제 성공 후 목록과 상세를 갱신한다", async () => {
+    const beanId = "024fc61d-5919-4031-9271-0ccf9a6a1af0";
+
+    await expect(deleteBeanAction({ beanId })).resolves.toStrictEqual({});
+
+    expect(mocks.deleteBeanById).toHaveBeenCalledWith(beanId);
+    expect(mocks.revalidatePath).toHaveBeenNthCalledWith(
+      1,
+      "/(main)/(private)/beans",
+      "layout",
+    );
+    expect(mocks.revalidatePath).toHaveBeenNthCalledWith(2, `/beans/${beanId}`);
+  });
+
+  it("비로그인 상태에서는 원두를 삭제하지 않는다", async () => {
+    mocks.getUser.mockResolvedValue({ data: { user: null }, error: null });
+
+    await expect(
+      deleteBeanAction({
+        beanId: "024fc61d-5919-4031-9271-0ccf9a6a1af0",
+      }),
+    ).resolves.toStrictEqual({ errorMessage: "로그인 후 원두를 삭제해주세요" });
+
+    expect(mocks.deleteBeanById).not.toHaveBeenCalled();
+  });
+
+  it("잘못된 원두 ID는 삭제하지 않는다", async () => {
+    await expect(deleteBeanAction({ beanId: "not-a-uuid" })).resolves.toEqual({
+      errorMessage: "원두를 삭제할 수 없습니다",
+    });
+
+    expect(mocks.deleteBeanById).not.toHaveBeenCalled();
   });
 });
