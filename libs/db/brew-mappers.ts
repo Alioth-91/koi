@@ -7,7 +7,11 @@ type BrewInsert = Database["public"]["Tables"]["brews"]["Insert"];
 type SensoryScore = Brew["sensory"][keyof Brew["sensory"]];
 
 export type ResolvedBrewForm =
-  | (Extract<BrewForm, { type: "home" }> & { beanName: string })
+  | (Extract<BrewForm, { type: "home" }> & {
+      beanName: string;
+      beanPrice?: number;
+      beanWeight?: number;
+    })
   | Extract<BrewForm, { type: "cafe" }>;
 
 /**
@@ -37,6 +41,8 @@ export function toBrew(row: BrewRow): Brew {
       ...common,
       beanId: row.bean_id ?? undefined,
       beanName: row.bean_name,
+      beanPrice: row.bean_price ?? undefined,
+      beanWeight: row.bean_weight ?? undefined,
       dose: row.dose ?? undefined,
       method: row.method ?? undefined,
       time: toTime(row.duration_seconds),
@@ -96,6 +102,8 @@ export function toBrewInsert(
       address: null,
       bean_id: input.beanId,
       bean_name: input.beanName,
+      bean_price: input.beanPrice ?? null,
+      bean_weight: input.beanWeight ?? null,
       cafe_name: null,
       dose: input.dose ?? null,
       duration_seconds: toDurationSeconds(input.time),
@@ -115,6 +123,8 @@ export function toBrewInsert(
     address: input.address ?? null,
     bean_id: null,
     bean_name: null,
+    bean_price: null,
+    bean_weight: null,
     cafe_name: input.cafeName,
     dose: null,
     duration_seconds: null,

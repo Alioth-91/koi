@@ -15,6 +15,8 @@ const baseRow: BrewRow = {
   aftertaste: 3,
   bean_id: "bean-1",
   bean_name: "예가체프",
+  bean_price: 18000,
+  bean_weight: 200,
   bitterness: 2,
   body: 3,
   cafe_name: null,
@@ -45,6 +47,8 @@ describe("toBrew", () => {
     expect(toBrew(baseRow)).toStrictEqual({
       beanId: "bean-1",
       beanName: "예가체프",
+      beanPrice: 18000,
+      beanWeight: 200,
       date: "2026-09-01",
       dose: 18,
       id: "brew-1",
@@ -62,6 +66,20 @@ describe("toBrew", () => {
       type: "home",
       water: 300,
       waterTemp: 92,
+    });
+  });
+
+  it("원가 스냅샷이 없는 기존 집 기록은 값을 비워 둔다", () => {
+    expect(
+      toBrew({
+        ...baseRow,
+        bean_price: null,
+        bean_weight: null,
+      }),
+    ).toMatchObject({
+      beanPrice: undefined,
+      beanWeight: undefined,
+      type: "home",
     });
   });
 
@@ -114,6 +132,8 @@ describe("toBrewInsert", () => {
   const homeInput: ResolvedBrewForm = {
     beanId: "550e8400-e29b-41d4-a716-446655440000",
     beanName: "에티오피아 예가체프",
+    beanPrice: 18000,
+    beanWeight: 200,
     date: "2026-09-01",
     dose: 18,
     memo: "단맛이 좋았다",
@@ -139,6 +159,8 @@ describe("toBrewInsert", () => {
       aftertaste: 3,
       bean_id: "550e8400-e29b-41d4-a716-446655440000",
       bean_name: "에티오피아 예가체프",
+      bean_price: 18000,
+      bean_weight: 200,
       bitterness: 2,
       body: 3,
       cafe_name: null,
@@ -187,6 +209,8 @@ describe("toBrewInsert", () => {
       aftertaste: 3,
       bean_id: null,
       bean_name: null,
+      bean_price: null,
+      bean_weight: null,
       bitterness: 2,
       body: 3,
       cafe_name: "프릳츠 도화점",

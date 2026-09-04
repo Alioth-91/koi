@@ -1,7 +1,6 @@
 import CafeStaticMap from "@/components/brews/cafe-static-map";
 import { cupCost } from "@/libs/beans/calculations";
 import { cn, formatDate, formatScore } from "@/libs/utils";
-import type { Bean } from "@/types/bean";
 import type { Brew } from "@/types/brew";
 
 const SENSORY = [
@@ -13,11 +12,10 @@ const SENSORY = [
 ] as const;
 
 type BrewDetailProps = {
-  bean: Bean | null;
   brew: Brew;
 };
 
-export default function BrewDetail({ bean, brew }: BrewDetailProps) {
+export default function BrewDetail({ brew }: BrewDetailProps) {
   const bars = SENSORY.map(([key, label, color]) => ({
     label,
     color,
@@ -47,7 +45,7 @@ export default function BrewDetail({ bean, brew }: BrewDetailProps) {
       </header>
 
       <dl className="grid grid-cols-2 gap-x-5">
-        {rowsOf(brew, bean).map(([label, value]) => (
+        {rowsOf(brew).map(([label, value]) => (
           <div
             key={label}
             className="flex items-baseline justify-between border-b border-border-foreground py-2 text-xs"
@@ -116,7 +114,7 @@ export default function BrewDetail({ bean, brew }: BrewDetailProps) {
 }
 
 // 빈 항목은 행째 빠진다.
-function rowsOf(brew: Brew, bean: Bean | null) {
+function rowsOf(brew: Brew) {
   const entries: [string, string | undefined][] =
     brew.type === "home"
       ? [
@@ -125,7 +123,10 @@ function rowsOf(brew: Brew, bean: Bean | null) {
           ["원두", brew.dose ? `${brew.dose}g` : undefined],
           ["물", brew.water ? `${brew.water}g` : undefined],
           ["시간", brew.time],
-          ["한 잔 원가", cupCostLabel(bean, brew.dose)],
+          [
+            "한 잔 원가",
+            cupCostLabel(brew.beanPrice, brew.beanWeight, brew.dose),
+          ],
         ]
       : [
           ["메뉴", brew.menu],
@@ -136,8 +137,12 @@ function rowsOf(brew: Brew, bean: Bean | null) {
   return entries.filter(([, value]) => value);
 }
 
-function cupCostLabel(bean: Bean | null, dose?: number) {
-  const cost = cupCost(bean?.price, bean?.weight, dose);
+function cupCostLabel(
+  beanPrice: number | undefined,
+  beanWeight: number | undefined,
+  dose?: number,
+) {
+  const cost = cupCost(beanPrice, beanWeight, dose);
 
   return cost === undefined
     ? undefined

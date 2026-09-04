@@ -50,7 +50,15 @@ export async function createBrew(input: unknown): Promise<BrewActionState> {
         };
       }
 
-      await insertBrew({ ...parsed.data, beanName: bean.name }, data.user.id);
+      await insertBrew(
+        {
+          ...parsed.data,
+          beanName: bean.name,
+          beanPrice: bean.price,
+          beanWeight: bean.weight,
+        },
+        data.user.id,
+      );
     } else {
       await insertBrew(parsed.data, data.user.id);
     }
