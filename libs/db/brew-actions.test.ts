@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
+  deleteBrewById: vi.fn(),
   getBeanById: vi.fn(),
   getUser: vi.fn(),
   insertBrew: vi.fn(),
@@ -16,6 +17,7 @@ vi.mock("@/libs/db/beans", () => ({
 }));
 
 vi.mock("@/libs/db/brews", () => ({
+  deleteBrewById: mocks.deleteBrewById,
   insertBrew: mocks.insertBrew,
 }));
 
@@ -25,11 +27,15 @@ vi.mock("@/libs/db/server", () => ({
   })),
 }));
 
-import { createBrew } from "@/app/(main)/(private)/brews/actions";
+import {
+  createBrew,
+  deleteBrew as deleteBrewAction,
+} from "@/app/(main)/(private)/brews/actions";
 
 describe("createBrew", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.deleteBrewById.mockResolvedValue(undefined);
     mocks.getUser.mockResolvedValue({
       data: { user: { id: "user-1" } },
       error: null,
@@ -71,5 +77,35 @@ describe("createBrew", () => {
       }),
       "user-1",
     );
+  });
+
+  it("기록 삭제 성공 후 목록과 상세를 갱신한다", async () => {
+    const brewId = "024fc61d-5919-4031-9271-0ccf9a6a1af0";
+
+    await expect(deleteBrewAction({ brewId })).resolves.toStrictEqual({});
+
+    expect(mocks.deleteBrewById).toHaveBeenCalledWith(brewId);
+    expect(mocks.revalidatePath).toHaveBeenNthCalledWith(1, "/brews", "layout");
+    expect(mocks.revalidatePath).toHaveBeenNthCalledWith(2, `/brews/${brewId}`);
+  });
+
+  it("비로그인 상태에서는 기록을 삭제하지 않는다", async () => {
+    mocks.getUser.mockResolvedValue({ data: { user: null }, error: null });
+
+    await expect(
+      deleteBrewAction({
+        brewId: "024fc61d-5919-4031-9271-0ccf9a6a1af0",
+      }),
+    ).resolves.toStrictEqual({ errorMessage: "로그인 후 기록을 삭제해주세요" });
+
+    expect(mocks.deleteBrewById).not.toHaveBeenCalled();
+  });
+
+  it("잘못된 기록 ID는 삭제하지 않는다", async () => {
+    await expect(deleteBrewAction({ brewId: "not-a-uuid" })).resolves.toEqual({
+      errorMessage: "기록을 삭제할 수 없습니다",
+    });
+
+    expect(mocks.deleteBrewById).not.toHaveBeenCalled();
   });
 });

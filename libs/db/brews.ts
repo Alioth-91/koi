@@ -37,6 +37,18 @@ export async function insertBrew(
 }
 
 /**
+ * 기록을 삭제한다. 삭제 권한은 Supabase RLS가 검사한다.
+ */
+export async function deleteBrewById(brewId: string): Promise<void> {
+  const supabase = await createClient();
+  const { error } = await supabase.from("brews").delete().eq("id", brewId);
+
+  if (error) {
+    throw new Error("기록을 삭제하지 못했습니다", { cause: error });
+  }
+}
+
+/**
  * 로그인한 사용자의 모든 기록을 최신 날짜순으로 조회한다.
  */
 export async function listBrews(): Promise<Brew[]> {

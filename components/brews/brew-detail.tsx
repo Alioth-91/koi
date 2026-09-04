@@ -1,4 +1,5 @@
 import CafeStaticMap from "@/components/brews/cafe-static-map";
+import BrewDeleteModal from "@/components/brews/brew-delete-modal";
 import { cupCost } from "@/libs/beans/calculations";
 import { cn, formatDate, formatScore } from "@/libs/utils";
 import type { Brew } from "@/types/brew";
@@ -23,25 +24,29 @@ export default function BrewDetail({ brew }: BrewDetailProps) {
   }));
   return (
     <article className="flex flex-col gap-4 p-6">
-      <header>
-        <span
-          className={cn(
-            "rounded-full px-2.5 py-1 text-[10.5px] font-extrabold",
-            brew.type === "home"
-              ? "bg-badge-home text-badge-home-foreground"
-              : "bg-badge-cafe text-badge-cafe-foreground",
-          )}
-        >
-          {brew.type === "home" ? "집" : "카페"}
-        </span>
+      <header className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <span
+            className={cn(
+              "rounded-full px-2.5 py-1 text-[10.5px] font-extrabold",
+              brew.type === "home"
+                ? "bg-badge-home text-badge-home-foreground"
+                : "bg-badge-cafe text-badge-cafe-foreground",
+            )}
+          >
+            {brew.type === "home" ? "집" : "카페"}
+          </span>
 
-        <h2 className="mt-2 text-2xl font-extrabold">
-          {brew.type === "home" ? brew.beanName : brew.cafeName}
-        </h2>
+          <h2 className="mt-2 truncate text-2xl font-extrabold">
+            {brew.type === "home" ? brew.beanName : brew.cafeName}
+          </h2>
 
-        <p className="mt-1 text-xs text-muted-foreground">
-          {formatDate(brew.date)}
-        </p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {formatDate(brew.date)}
+          </p>
+        </div>
+
+        <BrewDeleteModal brewId={brew.id} />
       </header>
 
       <dl className="grid grid-cols-2 gap-x-5">
