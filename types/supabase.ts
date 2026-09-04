@@ -20,6 +20,12 @@ export type Database = {
           created_at: string;
           id: string;
           name: string;
+          photo_1_large_path: string | null;
+          photo_1_thumbnail_path: string | null;
+          photo_2_large_path: string | null;
+          photo_2_thumbnail_path: string | null;
+          photo_3_large_path: string | null;
+          photo_3_thumbnail_path: string | null;
           price: number | null;
           process: string | null;
           roast_level: string | null;
@@ -33,6 +39,12 @@ export type Database = {
           created_at?: string;
           id?: string;
           name: string;
+          photo_1_large_path?: string | null;
+          photo_1_thumbnail_path?: string | null;
+          photo_2_large_path?: string | null;
+          photo_2_thumbnail_path?: string | null;
+          photo_3_large_path?: string | null;
+          photo_3_thumbnail_path?: string | null;
           price?: number | null;
           process?: string | null;
           roast_level?: string | null;
@@ -46,6 +58,12 @@ export type Database = {
           created_at?: string;
           id?: string;
           name?: string;
+          photo_1_large_path?: string | null;
+          photo_1_thumbnail_path?: string | null;
+          photo_2_large_path?: string | null;
+          photo_2_thumbnail_path?: string | null;
+          photo_3_large_path?: string | null;
+          photo_3_thumbnail_path?: string | null;
           price?: number | null;
           process?: string | null;
           roast_level?: string | null;

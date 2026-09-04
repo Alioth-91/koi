@@ -29,5 +29,7 @@ type Assert<T extends true> = T;
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars -- 검사 자체가 목적이라 쓰이지 않는다
 type _BeanFormMatchesBean = Assert<
-  BeanForm & { id: string } extends Bean ? true : false
+  BeanForm & { id: string; photos: Bean["photos"] } extends Bean
+    ? true
+    : false
 >;

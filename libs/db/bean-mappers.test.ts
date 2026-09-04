@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { toBean, toBeanInsert, toBeanUpdate } from "@/libs/db/bean-mappers";
+import {
+  toBean,
+  toBeanInsert,
+  toBeanPhotoColumns,
+  toBeanUpdate,
+} from "@/libs/db/bean-mappers";
 import type { Database } from "@/types/supabase";
 
 type BeanRow = Database["public"]["Tables"]["beans"]["Row"];
@@ -12,6 +17,12 @@ describe("toBean", () => {
       created_at: "2026-09-02T01:00:00.000Z",
       id: "bean-1",
       name: "예가체프",
+      photo_1_large_path: null,
+      photo_1_thumbnail_path: null,
+      photo_2_large_path: null,
+      photo_2_thumbnail_path: null,
+      photo_3_large_path: null,
+      photo_3_thumbnail_path: null,
       price: 18000,
       process: "워시드",
       roast_level: "라이트",
@@ -31,6 +42,7 @@ describe("toBean", () => {
       roastedAt: "2026-08-28",
       roastery: "펠트 커피",
       weight: 200,
+      photos: [],
     });
   });
 
@@ -40,6 +52,12 @@ describe("toBean", () => {
       created_at: "2026-09-02T01:00:00.000Z",
       id: "bean-2",
       name: "케냐 AA",
+      photo_1_large_path: null,
+      photo_1_thumbnail_path: null,
+      photo_2_large_path: null,
+      photo_2_thumbnail_path: null,
+      photo_3_large_path: null,
+      photo_3_thumbnail_path: null,
       price: null,
       process: null,
       roast_level: null,
@@ -59,6 +77,103 @@ describe("toBean", () => {
       roastedAt: undefined,
       roastery: undefined,
       weight: undefined,
+      photos: [],
+    });
+  });
+
+  it("세 슬롯의 순서와 variant 쌍을 보존한다", () => {
+    const row: BeanRow = {
+      archived: false,
+      created_at: "2026-09-02T01:00:00.000Z",
+      id: "bean-3",
+      name: "콜롬비아 핑크 버번",
+      photo_1_large_path: "user-1/beans/bean-3/photo-1/large.webp",
+      photo_1_thumbnail_path:
+        "user-1/beans/bean-3/photo-1/thumbnail.webp",
+      photo_2_large_path: "user-1/beans/bean-3/photo-2/large.webp",
+      photo_2_thumbnail_path:
+        "user-1/beans/bean-3/photo-2/thumbnail.webp",
+      photo_3_large_path: null,
+      photo_3_thumbnail_path: null,
+      price: null,
+      process: "내추럴",
+      roast_level: "라이트",
+      roasted_at: null,
+      roastery: "모모스",
+      user_id: "user-1",
+      weight: null,
+    };
+
+    expect(toBean(row).photos).toStrictEqual([
+      {
+        largePath: "user-1/beans/bean-3/photo-1/large.webp",
+        thumbnailPath: "user-1/beans/bean-3/photo-1/thumbnail.webp",
+      },
+      {
+        largePath: "user-1/beans/bean-3/photo-2/large.webp",
+        thumbnailPath: "user-1/beans/bean-3/photo-2/thumbnail.webp",
+      },
+    ]);
+  });
+
+  it("한 variant만 있는 비정상 row를 조용히 버리지 않는다", () => {
+    const row: BeanRow = {
+      archived: false,
+      created_at: "2026-09-02T01:00:00.000Z",
+      id: "bean-4",
+      name: "케냐 AA",
+      photo_1_large_path: null,
+      photo_1_thumbnail_path: "user-1/beans/bean-4/photo-1/thumbnail.webp",
+      photo_2_large_path: null,
+      photo_2_thumbnail_path: null,
+      photo_3_large_path: null,
+      photo_3_thumbnail_path: null,
+      price: null,
+      process: null,
+      roast_level: null,
+      roasted_at: null,
+      roastery: null,
+      user_id: "user-1",
+      weight: null,
+    };
+
+    expect(() => toBean(row)).toThrow("유효하지 않은 원두 사진입니다");
+  });
+});
+
+describe("toBeanPhotoColumns", () => {
+  it("사진 배열을 여섯 개 nullable 컬럼으로 펼친다", () => {
+    expect(
+      toBeanPhotoColumns([
+        {
+          largePath: "user-1/beans/bean-1/photo-1/large.webp",
+          thumbnailPath: "user-1/beans/bean-1/photo-1/thumbnail.webp",
+        },
+        {
+          largePath: "user-1/beans/bean-1/photo-2/large.webp",
+          thumbnailPath: "user-1/beans/bean-1/photo-2/thumbnail.webp",
+        },
+      ]),
+    ).toStrictEqual({
+      photo_1_large_path: "user-1/beans/bean-1/photo-1/large.webp",
+      photo_1_thumbnail_path:
+        "user-1/beans/bean-1/photo-1/thumbnail.webp",
+      photo_2_large_path: "user-1/beans/bean-1/photo-2/large.webp",
+      photo_2_thumbnail_path:
+        "user-1/beans/bean-1/photo-2/thumbnail.webp",
+      photo_3_large_path: null,
+      photo_3_thumbnail_path: null,
+    });
+  });
+
+  it("사진이 없으면 여섯 컬럼을 모두 null로 만든다", () => {
+    expect(toBeanPhotoColumns([])).toStrictEqual({
+      photo_1_large_path: null,
+      photo_1_thumbnail_path: null,
+      photo_2_large_path: null,
+      photo_2_thumbnail_path: null,
+      photo_3_large_path: null,
+      photo_3_thumbnail_path: null,
     });
   });
 });
