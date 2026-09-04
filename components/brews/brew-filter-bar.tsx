@@ -7,8 +7,8 @@ import { useRouter } from "next/navigation";
 import BrewFilterPanel from "@/components/brews/brew-filter-panel";
 import {
   countBrewFilters,
-  toBrewFilterSearchParams,
   type BrewFilters,
+  withBrewFilters,
 } from "@/libs/brews/filters";
 import { cn } from "@/libs/utils";
 import type { Bean } from "@/types/bean";
@@ -36,10 +36,7 @@ export default function BrewFilterBar({
   const activeCount = countBrewFilters(filters);
 
   const replaceFilters = (nextFilters: BrewFilters) => {
-    const query = toBrewFilterSearchParams(nextFilters).toString();
-    const href = query ? `/brews?${query}` : "/brews";
-
-    router.replace(href as Route);
+    router.replace(withBrewFilters("/brews", nextFilters) as Route);
   };
 
   const apply = () => {

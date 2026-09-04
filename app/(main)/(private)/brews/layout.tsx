@@ -29,20 +29,18 @@ export default async function BrewsLayout({ children }: LayoutProps<"/brews">) {
       </header>
 
       {/* 목록은 레이아웃에 둔다 — 하위 라우트가 바뀌어도 다시 그려지지 않는다. */}
-      <BrewPanes
-        list={
-          <Suspense
-            fallback={
-              <div className="flex min-h-0 items-center justify-center border-r border-border-foreground p-6 text-sm text-muted-foreground">
-                기록을 불러오는 중...
-              </div>
-            }
-          >
-            <BrewList beans={beans} brews={brews} />
-          </Suspense>
+      <Suspense
+        fallback={
+          <div className="flex min-h-0 flex-1 items-center justify-center border-r border-border-foreground p-6 text-sm text-muted-foreground">
+            기록을 불러오는 중...
+          </div>
         }
-        detail={children}
-      />
+      >
+        <BrewPanes
+          list={<BrewList beans={beans} brews={brews} />}
+          detail={children}
+        />
+      </Suspense>
     </main>
   );
 }

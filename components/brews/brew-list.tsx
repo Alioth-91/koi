@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import type { Route } from "next";
 import { usePathname, useSearchParams } from "next/navigation";
 
 import BrewFilterBar from "@/components/brews/brew-filter-bar";
@@ -8,6 +9,7 @@ import {
   filterBrews,
   listBrewMethods,
   parseBrewFilters,
+  withBrewFilters,
 } from "@/libs/brews/filters";
 import { cn, formatDate, formatScore } from "@/libs/utils";
 import type { Bean } from "@/types/bean";
@@ -66,7 +68,7 @@ export default function BrewList({ beans, brews }: Props) {
               <li key={brew.id}>
                 <Link
                   aria-current={isActive ? "page" : undefined}
-                  href={`/brews/${brew.id}`}
+                  href={withBrewFilters(`/brews/${brew.id}`, filters) as Route}
                   className={cn(
                     "flex items-center gap-3 rounded-2xl px-3.5 py-3 transition hover:bg-primary-tint focus-visible:ring-2 focus-visible:ring-foreground focus-visible:outline-hidden",
                     isActive && "bg-primary-tint",

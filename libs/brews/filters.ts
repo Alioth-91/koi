@@ -44,6 +44,12 @@ export function toBrewFilterSearchParams(
   return searchParams;
 }
 
+export function withBrewFilters(path: string, filters: BrewFilters): string {
+  const query = toBrewFilterSearchParams(filters).toString();
+
+  return query ? `${path}?${query}` : path;
+}
+
 export function filterBrews(brews: Brew[], filters: BrewFilters): Brew[] {
   return brews.filter((brew) => {
     if (filters.type && brew.type !== filters.type) return false;

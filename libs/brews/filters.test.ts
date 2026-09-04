@@ -6,6 +6,7 @@ import {
   listBrewMethods,
   parseBrewFilters,
   toBrewFilterSearchParams,
+  withBrewFilters,
 } from "@/libs/brews/filters";
 import type { Brew } from "@/types/brew";
 
@@ -97,6 +98,17 @@ describe("brew filters", () => {
         type: "home",
       }).toString(),
     ).toBe("bean=bean-1&method=V60&type=home");
+  });
+
+  it("기록 상세와 목록 복귀 경로에 현재 필터를 붙인다", () => {
+    expect(
+      withBrewFilters("/brews/brew-1", {
+        beanId: "bean-1",
+        type: "home",
+      }),
+    ).toBe("/brews/brew-1?bean=bean-1&type=home");
+
+    expect(withBrewFilters("/brews", {})).toBe("/brews");
   });
 
   it("선택된 필터 수를 센다", () => {
