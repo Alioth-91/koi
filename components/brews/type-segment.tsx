@@ -9,6 +9,7 @@ const TYPES = [
 ] as const;
 
 type Props = {
+  disabled?: boolean;
   onChange: (type: Brew["type"]) => void;
   value: Brew["type"];
 };
@@ -18,7 +19,7 @@ type Props = {
  *
  * 폼 안에 있지만 제출과 무관하다 — type="button"이라 눌러도 submit이 발생하지 않는다.
  */
-export default function TypeSegment({ onChange, value }: Props) {
+export default function TypeSegment({ disabled, onChange, value }: Props) {
   return (
     <div className="flex gap-1.5 rounded-2xl bg-primary-tint p-1">
       {TYPES.map((item) => (
@@ -27,7 +28,9 @@ export default function TypeSegment({ onChange, value }: Props) {
           className={cn(
             "h-10.5 flex-1 cursor-pointer rounded-xl text-sm font-extrabold text-muted-foreground transition-colors",
             value === item.value && "bg-background text-foreground shadow-card",
+            disabled && "cursor-not-allowed opacity-60",
           )}
+          disabled={disabled}
           key={item.value}
           onClick={() => onChange(item.value)}
           type="button"

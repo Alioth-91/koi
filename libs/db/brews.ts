@@ -3,6 +3,7 @@ import * as z from "zod";
 import {
   toBrew,
   toBrewInsert,
+  toBrewUpdate,
   type ResolvedBrewForm,
 } from "@/libs/db/brew-mappers";
 import { createClient } from "@/libs/db/server";
@@ -33,6 +34,24 @@ export async function insertBrew(
 
   if (error) {
     throw new Error(BREW_SAVE_ERROR, { cause: error });
+  }
+}
+
+/**
+ * 기록을 수정한다. 소유권은 Supabase RLS가 검사한다.
+ */
+export async function updateBrewById(
+  brewId: string,
+  input: ResolvedBrewForm,
+): Promise<void> {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("brews")
+    .update(toBrewUpdate(input))
+    .eq("id", brewId);
+
+  if (error) {
+    throw new Error("기록을 수정하지 못했습니다", { cause: error });
   }
 }
 

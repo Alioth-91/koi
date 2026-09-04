@@ -3,10 +3,11 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import * as z from "zod";
 
-import { createBrew } from "@/app/(main)/(private)/brews/actions";
+import { createBrew, updateBrew } from "@/app/(main)/(private)/brews/actions";
 import FieldCard from "@/components/brews/field-card";
 import MemoField from "@/components/brews/memo-field";
 import ScoreField from "@/components/brews/score-field";
@@ -37,6 +38,11 @@ const HOME_FIELDS = [
 type Props = {
   beanLoadState: BeanLoadState;
   beans: Bean[];
+  brew?: Extract<Brew, { type: "home" }>;
+  formId?: string;
+  isEditing: boolean;
+  onSubmitDisabledChange: (disabled: boolean) => void;
+  onSuccess?: () => void;
   onTypeChange: (type: Brew["type"]) => void;
 };
 
@@ -45,6 +51,11 @@ export type BeanLoadState = "loading" | "ready" | "error";
 export default function HomeBrewForm({
   beanLoadState,
   beans,
+  brew,
+  formId = BREW_NEW_FORM_ID,
+  isEditing,
+  onSubmitDisabledChange,
+  onSuccess,
   onTypeChange,
 }: Props) {
   const router = useRouter();
@@ -59,9 +70,27 @@ export default function HomeBrewForm({
   } = useForm<z.input<typeof homeSchema>, unknown, z.output<typeof homeSchema>>(
     {
       resolver: zodResolver(homeSchema),
-      defaultValues: { date: today(), score: 0, type: "home" },
+      defaultValues: brew
+        ? {
+            beanId: brew.beanId ?? "",
+            date: brew.date,
+            dose: brew.dose ?? "",
+            memo: brew.memo ?? "",
+            method: brew.method ?? "",
+            score: brew.score,
+            sensory: brew.sensory,
+            time: brew.time ?? "",
+            type: "home",
+            water: brew.water ?? "",
+            waterTemp: brew.waterTemp ?? "",
+          }
+        : { date: today(), score: 0, type: "home" },
     },
   );
+
+  useEffect(() => {
+    onSubmitDisabledChange(isSubmitting);
+  }, [isSubmitting, onSubmitDisabledChange]);
 
   const dose = Number(useWatch({ control, name: "dose" }));
   const water = Number(useWatch({ control, name: "water" }));
@@ -75,7 +104,9 @@ export default function HomeBrewForm({
   const onSubmit = handleSubmit(async (values) => {
     clearErrors("root.server");
 
-    const result = await createBrew(values);
+    const result = brew
+      ? await updateBrew({ brewId: brew.id, ...values })
+      : await createBrew(values);
 
     for (const field of HOME_FIELDS) {
       const message = result.errors?.[field]?.[0];
@@ -92,8 +123,12 @@ export default function HomeBrewForm({
 
     if (result.errors || result.errorMessage) return;
 
-    router.refresh();
-    router.replace("/brews");
+    if (onSuccess) {
+      onSuccess();
+    } else {
+      router.refresh();
+      router.replace("/brews");
+    }
   });
 
   return (
@@ -102,14 +137,18 @@ export default function HomeBrewForm({
       // flex-1 — 모달 높이가 h-4/5로 고정이라, 폼이 남는 높이를 채워야
       // 우측 패널의 세로 구분선이 바닥까지 이어진다.
       className="flex-1 md:grid md:grid-cols-[1fr_1fr]"
-      id={BREW_NEW_FORM_ID}
+      id={formId}
       aria-busy={isSubmitting}
       noValidate
       onSubmit={onSubmit}
     >
       <fieldset className="contents" disabled={isSubmitting}>
         <div className="flex min-w-0 flex-col gap-2.5 p-6">
-          <TypeSegment onChange={onTypeChange} value="home" />
+          <TypeSegment
+            disabled={isEditing}
+            onChange={onTypeChange}
+            value="home"
+          />
 
           {/* 시안 기준 2열. 좁은 화면에서도 2열을 유지한다 — 칸이 짧아 한 줄에 둘이 들어간다. */}
           <div className="grid grid-cols-2 gap-2.5">

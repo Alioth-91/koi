@@ -1,5 +1,6 @@
 import CafeStaticMap from "@/components/brews/cafe-static-map";
 import BrewDeleteModal from "@/components/brews/brew-delete-modal";
+import BrewEditModal from "@/components/brews/brew-edit-modal";
 import { cupCost } from "@/libs/beans/calculations";
 import { cn, formatDate, formatScore } from "@/libs/utils";
 import type { Brew } from "@/types/brew";
@@ -46,7 +47,10 @@ export default function BrewDetail({ brew }: BrewDetailProps) {
           </p>
         </div>
 
-        <BrewDeleteModal brewId={brew.id} />
+        <div className="flex shrink-0 gap-2">
+          <BrewEditModal brew={brew} />
+          <BrewDeleteModal brewId={brew.id} />
+        </div>
       </header>
 
       <dl className="grid grid-cols-2 gap-x-5">

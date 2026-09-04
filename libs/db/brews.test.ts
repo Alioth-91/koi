@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   toBrew,
   toBrewInsert,
+  toBrewUpdate,
   type ResolvedBrewForm,
 } from "@/libs/db/brew-mappers";
 import type { Database } from "@/types/supabase";
@@ -229,6 +230,57 @@ describe("toBrewInsert", () => {
       type: "cafe",
       user_id: "user-1",
       water: null,
+      water_temp: null,
+    });
+  });
+});
+
+describe("toBrewUpdate", () => {
+  it("기록 수정 row에는 스냅샷을 포함하고 user_id는 포함하지 않는다", () => {
+    expect(
+      toBrewUpdate({
+        beanId: "550e8400-e29b-41d4-a716-446655440000",
+        beanName: "예가체프",
+        beanPrice: 18000,
+        beanWeight: 200,
+        date: "2026-09-01",
+        dose: 18,
+        score: 4.5,
+        sensory: {
+          acidity: 4,
+          aftertaste: 3,
+          bitterness: 2,
+          body: 3,
+          sweetness: 5,
+        },
+        type: "home",
+        water: 300,
+      }),
+    ).toStrictEqual({
+      acidity: 4,
+      address: null,
+      aftertaste: 3,
+      bean_id: "550e8400-e29b-41d4-a716-446655440000",
+      bean_name: "예가체프",
+      bean_price: 18000,
+      bean_weight: 200,
+      bitterness: 2,
+      body: 3,
+      cafe_name: null,
+      date: "2026-09-01",
+      dose: 18,
+      duration_seconds: null,
+      lat: null,
+      lng: null,
+      memo: null,
+      menu: null,
+      method: null,
+      price: null,
+      score: 4.5,
+      sweetness: 5,
+      temperature: null,
+      type: "home",
+      water: 300,
       water_temp: null,
     });
   });

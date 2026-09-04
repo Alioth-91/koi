@@ -2,11 +2,11 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import * as z from "zod";
 
-import { createBrew } from "@/app/(main)/(private)/brews/actions";
+import { createBrew, updateBrew } from "@/app/(main)/(private)/brews/actions";
 import CafeMap from "@/components/brews/cafe-map";
 import CafeSearch, { type PickedCafe } from "@/components/brews/cafe-search";
 import FieldCard from "@/components/brews/field-card";
@@ -17,7 +17,7 @@ import TypeSegment from "@/components/brews/type-segment";
 import { BREW_NEW_FORM_ID } from "@/libs/constants/forms";
 import { today } from "@/libs/utils";
 import { cafeSchema } from "@/libs/schemas/brew";
-import type { Brew } from "@/types/brew";
+import type { Brew, CafeBrew } from "@/types/brew";
 
 const CAFE_FIELDS = [
   "cafeName",
@@ -36,12 +36,32 @@ const CAFE_FIELDS = [
  * 카페에서 주문한 기록 작성 폼
  */
 type Props = {
+  brew?: CafeBrew;
+  formId?: string;
+  isEditing: boolean;
+  onSubmitDisabledChange: (disabled: boolean) => void;
+  onSuccess?: () => void;
   onTypeChange: (type: Brew["type"]) => void;
 };
 
-export default function CafeBrewForm({ onTypeChange }: Props) {
+export default function CafeBrewForm({
+  brew,
+  formId = BREW_NEW_FORM_ID,
+  isEditing,
+  onSubmitDisabledChange,
+  onSuccess,
+  onTypeChange,
+}: Props) {
   const router = useRouter();
-  const [picked, setPicked] = useState<PickedCafe | null>(null);
+  const [picked, setPicked] = useState<PickedCafe | null>(() =>
+    brew?.location
+      ? {
+          address: brew.address ?? "",
+          location: brew.location,
+          name: brew.cafeName,
+        }
+      : null,
+  );
 
   const {
     clearErrors,
@@ -54,9 +74,27 @@ export default function CafeBrewForm({ onTypeChange }: Props) {
   } = useForm<z.input<typeof cafeSchema>, unknown, z.output<typeof cafeSchema>>(
     {
       resolver: zodResolver(cafeSchema),
-      defaultValues: { date: today(), score: 0, type: "cafe" },
+      defaultValues: brew
+        ? {
+            address: brew.address ?? "",
+            cafeName: brew.cafeName,
+            date: brew.date,
+            location: brew.location,
+            menu: brew.menu ?? "",
+            memo: brew.memo ?? "",
+            price: brew.price ?? "",
+            score: brew.score,
+            sensory: brew.sensory,
+            temperature: brew.temperature ?? "",
+            type: "cafe",
+          }
+        : { date: today(), score: 0, type: "cafe" },
     },
   );
+
+  useEffect(() => {
+    onSubmitDisabledChange(isSubmitting);
+  }, [isSubmitting, onSubmitDisabledChange]);
 
   const price = Number(useWatch({ control, name: "price" }));
   const score = useWatch({ control, name: "score" }) ?? 0;
@@ -67,7 +105,9 @@ export default function CafeBrewForm({ onTypeChange }: Props) {
   const onSubmit = handleSubmit(async (values) => {
     clearErrors("root.server");
 
-    const result = await createBrew(values);
+    const result = brew
+      ? await updateBrew({ brewId: brew.id, ...values })
+      : await createBrew(values);
 
     for (const field of CAFE_FIELDS) {
       const message = result.errors?.[field]?.[0];
@@ -84,21 +124,29 @@ export default function CafeBrewForm({ onTypeChange }: Props) {
 
     if (result.errors || result.errorMessage) return;
 
-    router.refresh();
-    router.replace("/brews");
+    if (onSuccess) {
+      onSuccess();
+    } else {
+      router.refresh();
+      router.replace("/brews");
+    }
   });
 
   return (
     <form
       aria-busy={isSubmitting}
       className="flex-1 md:grid md:grid-cols-[1fr_1fr]"
-      id={BREW_NEW_FORM_ID}
+      id={formId}
       noValidate
       onSubmit={onSubmit}
     >
       <fieldset className="contents" disabled={isSubmitting}>
         <div className="flex min-w-0 flex-col gap-2.5 p-6">
-          <TypeSegment onChange={onTypeChange} value="cafe" />
+          <TypeSegment
+            disabled={isEditing}
+            onChange={onTypeChange}
+            value="cafe"
+          />
 
           <FieldCard
             error={errors.cafeName?.message}
@@ -172,6 +220,7 @@ export default function CafeBrewForm({ onTypeChange }: Props) {
 
           <div className="mt-4 flex flex-col gap-2">
             <CafeSearch
+              initialValue={brew?.cafeName}
               onSelect={(cafe) => {
                 setPicked(cafe);
                 setValue("cafeName", cafe.name);

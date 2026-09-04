@@ -3,9 +3,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({
   deleteBrewById: vi.fn(),
   getBeanById: vi.fn(),
+  getBrewById: vi.fn(),
   getUser: vi.fn(),
   insertBrew: vi.fn(),
   revalidatePath: vi.fn(),
+  updateBrewById: vi.fn(),
 }));
 
 vi.mock("next/cache", () => ({
@@ -18,7 +20,9 @@ vi.mock("@/libs/db/beans", () => ({
 
 vi.mock("@/libs/db/brews", () => ({
   deleteBrewById: mocks.deleteBrewById,
+  getBrewById: mocks.getBrewById,
   insertBrew: mocks.insertBrew,
+  updateBrewById: mocks.updateBrewById,
 }));
 
 vi.mock("@/libs/db/server", () => ({
@@ -30,6 +34,7 @@ vi.mock("@/libs/db/server", () => ({
 import {
   createBrew,
   deleteBrew as deleteBrewAction,
+  updateBrew as updateBrewAction,
 } from "@/app/(main)/(private)/brews/actions";
 
 describe("createBrew", () => {
@@ -47,6 +52,7 @@ describe("createBrew", () => {
       weight: 200,
     });
     mocks.insertBrew.mockResolvedValue(undefined);
+    mocks.updateBrewById.mockResolvedValue(undefined);
   });
 
   it("집 기록 저장 시 서버가 읽은 원두 가격과 용량을 스냅샷으로 전달한다", async () => {
@@ -76,6 +82,94 @@ describe("createBrew", () => {
         type: "home",
       }),
       "user-1",
+    );
+  });
+
+  it("집 기록의 원두를 바꾸면 새 원두의 스냅샷을 함께 갱신한다", async () => {
+    const brewId = "024fc61d-5919-4031-9271-0ccf9a6a1af0";
+    const beanId = "550e8400-e29b-41d4-a716-446655440000";
+
+    mocks.getBrewById.mockResolvedValue({
+      beanId: "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
+      beanName: "기존 원두",
+      beanPrice: 15000,
+      beanWeight: 200,
+      type: "home",
+    });
+    mocks.getBeanById.mockResolvedValue({
+      id: beanId,
+      name: "새 원두",
+      price: 21000,
+      weight: 250,
+    });
+
+    await expect(
+      updateBrewAction({
+        beanId,
+        brewId,
+        date: "2026-09-04",
+        dose: 18,
+        score: 4.5,
+        sensory: {
+          acidity: 4,
+          aftertaste: 3,
+          bitterness: 2,
+          body: 3,
+          sweetness: 5,
+        },
+        type: "home",
+        water: 300,
+      }),
+    ).resolves.toStrictEqual({});
+
+    expect(mocks.updateBrewById).toHaveBeenCalledWith(
+      brewId,
+      expect.objectContaining({
+        beanId,
+        beanName: "새 원두",
+        beanPrice: 21000,
+        beanWeight: 250,
+      }),
+    );
+  });
+
+  it("같은 원두로 집 기록을 수정하면 기존 스냅샷을 보존한다", async () => {
+    const brewId = "024fc61d-5919-4031-9271-0ccf9a6a1af0";
+    const beanId = "550e8400-e29b-41d4-a716-446655440000";
+
+    mocks.getBrewById.mockResolvedValue({
+      beanId,
+      beanName: "기록 당시 원두",
+      beanPrice: 15000,
+      beanWeight: 200,
+      type: "home",
+    });
+
+    await expect(
+      updateBrewAction({
+        beanId,
+        brewId,
+        date: "2026-09-04",
+        score: 4.5,
+        sensory: {
+          acidity: 4,
+          aftertaste: 3,
+          bitterness: 2,
+          body: 3,
+          sweetness: 5,
+        },
+        type: "home",
+      }),
+    ).resolves.toStrictEqual({});
+
+    expect(mocks.getBeanById).not.toHaveBeenCalled();
+    expect(mocks.updateBrewById).toHaveBeenCalledWith(
+      brewId,
+      expect.objectContaining({
+        beanName: "기록 당시 원두",
+        beanPrice: 15000,
+        beanWeight: 200,
+      }),
     );
   });
 

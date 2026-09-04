@@ -4,6 +4,7 @@ import type { Brew, CafeBrew, HomeBrew } from "@/types/brew";
 
 type BrewRow = Database["public"]["Tables"]["brews"]["Row"];
 type BrewInsert = Database["public"]["Tables"]["brews"]["Insert"];
+type BrewUpdate = Database["public"]["Tables"]["brews"]["Update"];
 type SensoryScore = Brew["sensory"][keyof Brew["sensory"]];
 
 export type ResolvedBrewForm =
@@ -83,6 +84,20 @@ export function toBrewInsert(
   input: ResolvedBrewForm,
   userId: string,
 ): BrewInsert {
+  return {
+    ...toBrewValues(input),
+    user_id: userId,
+  };
+}
+
+/**
+ * 기존 기록을 수정할 DB row로 바꾼다. id·user_id·created_at은 수정하지 않는다.
+ */
+export function toBrewUpdate(input: ResolvedBrewForm): BrewUpdate {
+  return toBrewValues(input);
+}
+
+function toBrewValues(input: ResolvedBrewForm): Omit<BrewInsert, "user_id"> {
   const common = {
     acidity: input.sensory.acidity,
     aftertaste: input.sensory.aftertaste,
@@ -93,7 +108,6 @@ export function toBrewInsert(
     score: input.score,
     sweetness: input.sensory.sweetness,
     type: input.type,
-    user_id: userId,
   };
 
   if (input.type === "home") {
