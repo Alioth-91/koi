@@ -9,15 +9,16 @@ export type PickedCafe = {
 };
 
 type Props = {
+  initialValue?: string;
   onSelect: (cafe: PickedCafe) => void;
 };
 
 /**
  * 카페 검색
  */
-export default function CafeSearch({ onSelect }: Props) {
+export default function CafeSearch({ initialValue, onSelect }: Props) {
   const boxRef = useRef<HTMLDivElement>(null);
-  const [keyword, setKeyword] = useState("");
+  const [keyword, setKeyword] = useState(initialValue ?? "");
   const [places, setPlaces] = useState<KakaoPlace[]>([]);
 
   useEffect(() => {

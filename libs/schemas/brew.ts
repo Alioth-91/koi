@@ -1,7 +1,6 @@
 import * as z from "zod";
 
 import { optionalNumber, optionalText } from "@/libs/schemas/fields";
-import type { Brew } from "@/types/brew";
 
 /**
  * 안 고른 축은 0이다. 라디오 미선택은 null, ✕ 칸은 "0", 등록 전에는 undefined로 온다.
@@ -36,10 +35,16 @@ const baseSchema = z.object({
 
 export const homeSchema = baseSchema.extend({
   type: z.literal("home"),
-  beanName: z.string().min(1, "원두 이름을 입력해주세요"),
+  beanId: z.uuid("원두를 선택해주세요"),
   dose: optionalNumber,
   method: optionalText,
-  time: optionalText,
+  time: z
+    .union([
+      z.literal(""),
+      z.string().regex(/^\d+:[0-5]\d$/, "시간은 mm:ss 형식으로 입력해주세요"),
+    ])
+    .transform((value) => (value === "" ? undefined : value))
+    .optional(),
   water: optionalNumber,
   waterTemp: optionalNumber,
 });
@@ -63,15 +68,5 @@ export const brewSchema = z.discriminatedUnion("type", [
   cafeSchema,
 ]);
 
-// 이제 BrewForm도 유니온이다 — types/brew.ts 의 Brew와 같은 모양.
+// 저장 폼은 연결할 원두 id를 들고, 원두 이름은 서버에서 스냅샷으로 붙인다.
 export type BrewForm = z.infer<typeof brewSchema>;
-
-/**
- * 스키마가 뽑은 타입이 types/brew와 어긋나면 빌드를 깨뜨린다.
- */
-type Assert<T extends true> = T;
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars -- 검사 자체가 목적이라 쓰이지 않는다
-type _BrewFormMatchesBrew = Assert<
-  BrewForm & { id: string } extends Brew ? true : false
->;

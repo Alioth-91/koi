@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import type { Route } from "next";
+import { usePathname, useSearchParams } from "next/navigation";
 import type { ReactNode } from "react";
 
+import { parseBrewFilters, withBrewFilters } from "@/libs/brews/filters";
 import { cn } from "@/libs/utils";
 
 type Props = {
@@ -19,6 +21,10 @@ type Props = {
 export default function BrewPanes({ list, detail }: Props) {
   // /brews면 목록만, /brews/1이면 상세만 (md 미만에서).
   const hasDetail = usePathname() !== "/brews";
+  const backHref = withBrewFilters(
+    "/brews",
+    parseBrewFilters(useSearchParams()),
+  );
 
   return (
     <div className="grid min-h-0 flex-1 md:grid-cols-[1fr_1.15fr]">
@@ -34,7 +40,7 @@ export default function BrewPanes({ list, detail }: Props) {
         )}
       >
         <Link
-          href="/brews"
+          href={backHref as Route}
           className="block px-4 pt-4 text-sm text-muted-foreground md:hidden"
         >
           ← 기록

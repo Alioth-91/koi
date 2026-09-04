@@ -33,8 +33,8 @@ components/                   *는 클라이언트 컴포넌트("use client"), �
 libs/
 ├── constants/routes.ts       navItems · isActiveNav
 ├── constants/site.ts         사이트 이름·설명·주소
+├── db/                       Supabase 조회·저장·매퍼
 ├── schemas/brew.ts           기록 폼 검증 (zod)
-├── mocks/brews.ts            임시 목데이터. 실제 데이터가 붙으면 지울 예정
 └── utils.ts                  cn() · formatDate()
 
 types/

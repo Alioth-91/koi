@@ -1,6 +1,9 @@
 import CafeStaticMap from "@/components/brews/cafe-static-map";
+import BrewDeleteModal from "@/components/brews/brew-delete-modal";
+import BrewEditModal from "@/components/brews/brew-edit-modal";
+import { cupCost } from "@/libs/beans/calculations";
 import { cn, formatDate, formatScore } from "@/libs/utils";
-import { Brew } from "@/types/brew";
+import type { Brew } from "@/types/brew";
 
 const SENSORY = [
   ["acidity", "산미", "bg-acidity"],
@@ -10,7 +13,11 @@ const SENSORY = [
   ["aftertaste", "여운", "bg-aftertaste"],
 ] as const;
 
-export default function BrewDetail({ brew }: { brew: Brew }) {
+type BrewDetailProps = {
+  brew: Brew;
+};
+
+export default function BrewDetail({ brew }: BrewDetailProps) {
   const bars = SENSORY.map(([key, label, color]) => ({
     label,
     color,
@@ -18,25 +25,32 @@ export default function BrewDetail({ brew }: { brew: Brew }) {
   }));
   return (
     <article className="flex flex-col gap-4 p-6">
-      <header>
-        <span
-          className={cn(
-            "rounded-full px-2.5 py-1 text-[10.5px] font-extrabold",
-            brew.type === "home"
-              ? "bg-badge-home text-badge-home-foreground"
-              : "bg-badge-cafe text-badge-cafe-foreground",
-          )}
-        >
-          {brew.type === "home" ? "집" : "카페"}
-        </span>
+      <header className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <span
+            className={cn(
+              "rounded-full px-2.5 py-1 text-[10.5px] font-extrabold",
+              brew.type === "home"
+                ? "bg-badge-home text-badge-home-foreground"
+                : "bg-badge-cafe text-badge-cafe-foreground",
+            )}
+          >
+            {brew.type === "home" ? "집" : "카페"}
+          </span>
 
-        <h2 className="mt-2 text-2xl font-extrabold">
-          {brew.type === "home" ? brew.beanName : brew.cafeName}
-        </h2>
+          <h2 className="mt-2 truncate text-2xl font-extrabold">
+            {brew.type === "home" ? brew.beanName : brew.cafeName}
+          </h2>
 
-        <p className="mt-1 text-xs text-muted-foreground">
-          {formatDate(brew.date)}
-        </p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {formatDate(brew.date)}
+          </p>
+        </div>
+
+        <div className="flex shrink-0 gap-2">
+          <BrewEditModal brew={brew} />
+          <BrewDeleteModal brewId={brew.id} />
+        </div>
       </header>
 
       <dl className="grid grid-cols-2 gap-x-5">
@@ -118,6 +132,10 @@ function rowsOf(brew: Brew) {
           ["원두", brew.dose ? `${brew.dose}g` : undefined],
           ["물", brew.water ? `${brew.water}g` : undefined],
           ["시간", brew.time],
+          [
+            "한 잔 원가",
+            cupCostLabel(brew.beanPrice, brew.beanWeight, brew.dose),
+          ],
         ]
       : [
           ["메뉴", brew.menu],
@@ -128,7 +146,19 @@ function rowsOf(brew: Brew) {
   return entries.filter(([, value]) => value);
 }
 
-// 저장하지 않고 두 값에서 계산한다 (명세 3.2).
+function cupCostLabel(
+  beanPrice: number | undefined,
+  beanWeight: number | undefined,
+  dose?: number,
+) {
+  const cost = cupCost(beanPrice, beanWeight, dose);
+
+  return cost === undefined
+    ? undefined
+    : `${Math.round(cost).toLocaleString("ko-KR")}원`;
+}
+
+// 저장하지 않고 두 값에서 계산한다.
 function ratioOf(dose?: number, water?: number) {
   if (!dose || !water) return undefined;
 

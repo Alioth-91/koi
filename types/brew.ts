@@ -20,6 +20,9 @@ export type HomeBrew = BrewBase & {
   // 원두가 삭제되면 기록은 남기고 연결만 끊길 수 있다.
   beanId?: string;
   beanName: string;
+  // 기록 당시 원두의 가격·구매 용량. 기존 기록에는 없을 수 있다.
+  beanPrice?: number;
+  beanWeight?: number;
   dose?: number;
   method?: string; // 추출 방식(ex. 에스프레소, 핸드드립, 프렌치프레스 등)
   time?: string;

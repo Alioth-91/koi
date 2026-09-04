@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 /**
- * [id]/page.tsx 의 notFound()가 여기로 온다.
+ * [brewId]/page.tsx 의 notFound()가 여기로 온다.
  *
  * page.tsx 자리에 렌더되므로 layout.tsx(헤더 + 목록)는 그대로 남는다 —
  * 오른쪽 칸만 이 내용으로 바뀐다.

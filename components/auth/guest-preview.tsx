@@ -50,7 +50,7 @@ export default function GuestPreview() {
             className="mx-auto mb-4 size-18"
             height={72}
             loading="eager"
-            src="/favicon.svg"
+            src="/icon.svg"
             width={72}
           />
 

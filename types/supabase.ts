@@ -63,6 +63,8 @@ export type Database = {
           aftertaste: number;
           bean_id: string | null;
           bean_name: string | null;
+          bean_price: number | null;
+          bean_weight: number | null;
           bitterness: number;
           body: number;
           cafe_name: string | null;
@@ -93,6 +95,8 @@ export type Database = {
           aftertaste?: number;
           bean_id?: string | null;
           bean_name?: string | null;
+          bean_price?: number | null;
+          bean_weight?: number | null;
           bitterness?: number;
           body?: number;
           cafe_name?: string | null;
@@ -123,6 +127,8 @@ export type Database = {
           aftertaste?: number;
           bean_id?: string | null;
           bean_name?: string | null;
+          bean_price?: number | null;
+          bean_weight?: number | null;
           bitterness?: number;
           body?: number;
           cafe_name?: string | null;

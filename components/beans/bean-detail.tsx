@@ -1,9 +1,12 @@
 import { PROCESS_BADGE, PROCESS_FALLBACK } from "@/libs/constants/beans";
 import { remainingWeight } from "@/libs/beans/calculations";
 import { cn, formatDate, formatScore } from "@/libs/utils";
-import { Bean } from "@/types/bean";
-import { HomeBrew } from "@/types/brew";
+import BeanArchiveToggle from "@/components/beans/bean-archive-toggle";
+import BeanDeleteModal from "@/components/beans/bean-delete-modal";
+import BeanEditModal from "@/components/beans/bean-edit-modal";
 import Link from "next/link";
+import type { Bean } from "@/types/bean";
+import type { HomeBrew } from "@/types/brew";
 
 type BeanDetailProps = {
   bean: Bean;
@@ -13,21 +16,34 @@ type BeanDetailProps = {
 export default function BeanDetail({ bean, homeBrews }: BeanDetailProps) {
   return (
     <article className="flex flex-col gap-4 p-6">
-      <header className="flex flex-col gap-2">
-        {bean.process && (
-          <span
-            className={cn(
-              "w-fit rounded-full px-2.5 py-1 text-[10.5px] font-extrabold",
-              PROCESS_BADGE[bean.process] ?? PROCESS_FALLBACK,
-            )}
-          >
-            <span className="sr-only">가공 방식 </span>
+      <header className="flex items-start justify-between gap-4">
+        <div className="flex min-w-0 flex-col gap-2">
+          {bean.process && (
+            <span
+              className={cn(
+                "w-fit rounded-full px-2.5 py-1 text-[10.5px] font-extrabold",
+                PROCESS_BADGE[bean.process] ?? PROCESS_FALLBACK,
+              )}
+            >
+              <span className="sr-only">가공 방식 </span>
 
-            {bean.process}
-          </span>
-        )}
+              {bean.process}
+            </span>
+          )}
 
-        <h2 className="text-2xl font-extrabold">{bean.name}</h2>
+          <h2 className="truncate text-2xl font-extrabold">{bean.name}</h2>
+        </div>
+
+        <div className="flex shrink-0 items-start gap-2">
+          <BeanEditModal bean={bean} />
+
+          <BeanArchiveToggle
+            archived={bean.archived ?? false}
+            beanId={bean.id}
+          />
+
+          <BeanDeleteModal beanId={bean.id} beanName={bean.name} />
+        </div>
       </header>
 
       <dl className="grid grid-cols-2 gap-x-5">
@@ -51,10 +67,10 @@ export default function BeanDetail({ bean, homeBrews }: BeanDetailProps) {
 
           {!!homeBrews.length && (
             <Link
-              href="/brews"
+              href={`/brews?bean=${bean.id}`}
               className="text-[11px] tracking-widest text-muted-foreground"
             >
-              전체 {homeBrews.length}건 보기
+              이 원두 기록 보기
             </Link>
           )}
         </div>
