@@ -21,20 +21,24 @@ const BREW_LOAD_ERROR = "기록을 불러오지 못했습니다";
 const BREW_SAVE_ERROR = "기록을 저장하지 못했습니다";
 
 /**
- * 서버에서 원두 연결을 확인한 기록을 로그인한 사용자의 기록으로 저장한다.
+ * 기록을 DB에 저장한 후 brewId를 반환한다.
  */
 export async function insertBrew(
   input: ResolvedBrewForm,
   userId: string,
-): Promise<void> {
+): Promise<string> {
   const supabase = await createClient();
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("brews")
-    .insert(toBrewInsert(input, userId));
+    .insert(toBrewInsert(input, userId))
+    .select("id")
+    .single();
 
   if (error) {
     throw new Error(BREW_SAVE_ERROR, { cause: error });
   }
+
+  return data.id;
 }
 
 /**

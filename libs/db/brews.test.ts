@@ -1,5 +1,10 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
+const mocks = vi.hoisted(() => ({ createClient: vi.fn() }));
+
+vi.mock("@/libs/db/server", () => ({ createClient: mocks.createClient }));
+
+import { insertBrew } from "@/libs/db/brews";
 import {
   toBrew,
   toBrewPhotoColumns,
@@ -60,11 +65,9 @@ describe("toBrew", () => {
       toBrew({
         ...baseRow,
         photo_1_large_path: "user-1/brews/brew-1/photo-1/large.webp",
-        photo_1_thumbnail_path:
-          "user-1/brews/brew-1/photo-1/thumbnail.webp",
+        photo_1_thumbnail_path: "user-1/brews/brew-1/photo-1/thumbnail.webp",
         photo_2_large_path: "user-1/brews/brew-1/photo-2/large.webp",
-        photo_2_thumbnail_path:
-          "user-1/brews/brew-1/photo-2/thumbnail.webp",
+        photo_2_thumbnail_path: "user-1/brews/brew-1/photo-2/thumbnail.webp",
       }).photos,
     ).toStrictEqual([
       {
@@ -82,8 +85,7 @@ describe("toBrew", () => {
     expect(() =>
       toBrew({
         ...baseRow,
-        photo_1_thumbnail_path:
-          "user-1/brews/brew-1/photo-1/thumbnail.webp",
+        photo_1_thumbnail_path: "user-1/brews/brew-1/photo-1/thumbnail.webp",
       }),
     ).toThrow("유효하지 않은 기록 사진입니다");
   });
@@ -190,11 +192,9 @@ describe("toBrewPhotoColumns", () => {
       ]),
     ).toStrictEqual({
       photo_1_large_path: "user-1/brews/brew-1/photo-1/large.webp",
-      photo_1_thumbnail_path:
-        "user-1/brews/brew-1/photo-1/thumbnail.webp",
+      photo_1_thumbnail_path: "user-1/brews/brew-1/photo-1/thumbnail.webp",
       photo_2_large_path: "user-1/brews/brew-1/photo-2/large.webp",
-      photo_2_thumbnail_path:
-        "user-1/brews/brew-1/photo-2/thumbnail.webp",
+      photo_2_thumbnail_path: "user-1/brews/brew-1/photo-2/thumbnail.webp",
       photo_3_large_path: null,
       photo_3_thumbnail_path: null,
     });
@@ -326,6 +326,23 @@ describe("toBrewInsert", () => {
       water: null,
       water_temp: null,
     });
+  });
+
+  it("DB가 만든 기록 ID를 반환한다", async () => {
+    const single = vi.fn().mockResolvedValue({
+      data: { id: "brew-1" },
+      error: null,
+    });
+
+    mocks.createClient.mockResolvedValue({
+      from: vi.fn().mockReturnValue({
+        insert: vi.fn().mockReturnValue({
+          select: vi.fn().mockReturnValue({ single }),
+        }),
+      }),
+    });
+
+    await expect(insertBrew(homeInput, "user-1")).resolves.toBe("brew-1");
   });
 });
 
