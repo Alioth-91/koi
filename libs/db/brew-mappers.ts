@@ -1,10 +1,19 @@
 import type { BrewForm } from "@/libs/schemas/brew";
 import type { Database } from "@/types/supabase";
-import type { Brew, CafeBrew, HomeBrew } from "@/types/brew";
+import type { Brew, BrewPhoto, CafeBrew, HomeBrew } from "@/types/brew";
 
 type BrewRow = Database["public"]["Tables"]["brews"]["Row"];
 type BrewInsert = Database["public"]["Tables"]["brews"]["Insert"];
 type BrewUpdate = Database["public"]["Tables"]["brews"]["Update"];
+type BrewPhotoRow = Pick<
+  BrewRow,
+  | "photo_1_thumbnail_path"
+  | "photo_1_large_path"
+  | "photo_2_thumbnail_path"
+  | "photo_2_large_path"
+  | "photo_3_thumbnail_path"
+  | "photo_3_large_path"
+>;
 type SensoryScore = Brew["sensory"][keyof Brew["sensory"]];
 
 export type ResolvedBrewForm =
@@ -23,6 +32,7 @@ export function toBrew(row: BrewRow): Brew {
     date: row.date,
     id: row.id,
     memo: row.memo ?? undefined,
+    photos: toBrewPhotos(row),
     score: row.score,
     sensory: {
       acidity: toSensoryScore(row.acidity),
@@ -74,6 +84,67 @@ export function toBrew(row: BrewRow): Brew {
   }
 
   throw new Error("지원하지 않는 기록 유형입니다");
+}
+
+export function toBrewPhotoColumns(
+  photos: BrewPhoto[],
+): Pick<
+  BrewUpdate,
+  | "photo_1_thumbnail_path"
+  | "photo_1_large_path"
+  | "photo_2_thumbnail_path"
+  | "photo_2_large_path"
+  | "photo_3_thumbnail_path"
+  | "photo_3_large_path"
+> {
+  if (photos.length > 3) {
+    throw new Error("기록 사진은 최대 3장까지 저장할 수 있습니다");
+  }
+
+  return {
+    photo_1_large_path: photos[0]?.largePath ?? null,
+    photo_1_thumbnail_path: photos[0]?.thumbnailPath ?? null,
+    photo_2_large_path: photos[1]?.largePath ?? null,
+    photo_2_thumbnail_path: photos[1]?.thumbnailPath ?? null,
+    photo_3_large_path: photos[2]?.largePath ?? null,
+    photo_3_thumbnail_path: photos[2]?.thumbnailPath ?? null,
+  };
+}
+
+function toBrewPhotos(row: BrewPhotoRow): BrewPhoto[] {
+  const slots = [
+    {
+      largePath: row.photo_1_large_path,
+      thumbnailPath: row.photo_1_thumbnail_path,
+    },
+    {
+      largePath: row.photo_2_large_path,
+      thumbnailPath: row.photo_2_thumbnail_path,
+    },
+    {
+      largePath: row.photo_3_large_path,
+      thumbnailPath: row.photo_3_thumbnail_path,
+    },
+  ];
+  const photos: BrewPhoto[] = [];
+  let emptySlotSeen = false;
+
+  for (const slot of slots) {
+    const { largePath, thumbnailPath } = slot;
+
+    if (largePath === null && thumbnailPath === null) {
+      emptySlotSeen = true;
+      continue;
+    }
+
+    if (largePath === null || thumbnailPath === null || emptySlotSeen) {
+      throw new Error("유효하지 않은 기록 사진입니다");
+    }
+
+    photos.push({ largePath, thumbnailPath });
+  }
+
+  return photos;
 }
 
 /**

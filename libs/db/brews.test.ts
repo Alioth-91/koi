@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   toBrew,
+  toBrewPhotoColumns,
   toBrewInsert,
   toBrewUpdate,
   type ResolvedBrewForm,
@@ -32,6 +33,12 @@ const baseRow: BrewRow = {
   memo: "단맛이 좋았다",
   menu: null,
   method: "핸드드립",
+  photo_1_large_path: null,
+  photo_1_thumbnail_path: null,
+  photo_2_large_path: null,
+  photo_2_thumbnail_path: null,
+  photo_3_large_path: null,
+  photo_3_thumbnail_path: null,
   photos: [],
   price: null,
   score: 4.5,
@@ -44,6 +51,43 @@ const baseRow: BrewRow = {
 };
 
 describe("toBrew", () => {
+  it("사진이 없는 기록은 빈 사진 배열을 반환한다", () => {
+    expect(toBrew(baseRow).photos).toStrictEqual([]);
+  });
+
+  it("세 슬롯의 순서와 variant 쌍을 보존한다", () => {
+    expect(
+      toBrew({
+        ...baseRow,
+        photo_1_large_path: "user-1/brews/brew-1/photo-1/large.webp",
+        photo_1_thumbnail_path:
+          "user-1/brews/brew-1/photo-1/thumbnail.webp",
+        photo_2_large_path: "user-1/brews/brew-1/photo-2/large.webp",
+        photo_2_thumbnail_path:
+          "user-1/brews/brew-1/photo-2/thumbnail.webp",
+      }).photos,
+    ).toStrictEqual([
+      {
+        largePath: "user-1/brews/brew-1/photo-1/large.webp",
+        thumbnailPath: "user-1/brews/brew-1/photo-1/thumbnail.webp",
+      },
+      {
+        largePath: "user-1/brews/brew-1/photo-2/large.webp",
+        thumbnailPath: "user-1/brews/brew-1/photo-2/thumbnail.webp",
+      },
+    ]);
+  });
+
+  it("한 variant만 있는 비정상 row를 조용히 버리지 않는다", () => {
+    expect(() =>
+      toBrew({
+        ...baseRow,
+        photo_1_thumbnail_path:
+          "user-1/brews/brew-1/photo-1/thumbnail.webp",
+      }),
+    ).toThrow("유효하지 않은 기록 사진입니다");
+  });
+
   it("집 기록의 snake_case와 초 단위 시간을 화면 타입으로 바꾼다", () => {
     expect(toBrew(baseRow)).toStrictEqual({
       beanId: "bean-1",
@@ -55,6 +99,7 @@ describe("toBrew", () => {
       id: "brew-1",
       memo: "단맛이 좋았다",
       method: "핸드드립",
+      photos: [],
       score: 4.5,
       sensory: {
         acidity: 4,
@@ -114,6 +159,7 @@ describe("toBrew", () => {
       location: { lat: 37.5407, lng: 126.9502 },
       memo: undefined,
       menu: "아메리카노",
+      photos: [],
       price: 5000,
       score: 4.5,
       sensory: {
@@ -126,6 +172,54 @@ describe("toBrew", () => {
       temperature: "hot",
       type: "cafe",
     });
+  });
+});
+
+describe("toBrewPhotoColumns", () => {
+  it("사진 배열을 여섯 개 nullable 컬럼으로 펼친다", () => {
+    expect(
+      toBrewPhotoColumns([
+        {
+          largePath: "user-1/brews/brew-1/photo-1/large.webp",
+          thumbnailPath: "user-1/brews/brew-1/photo-1/thumbnail.webp",
+        },
+        {
+          largePath: "user-1/brews/brew-1/photo-2/large.webp",
+          thumbnailPath: "user-1/brews/brew-1/photo-2/thumbnail.webp",
+        },
+      ]),
+    ).toStrictEqual({
+      photo_1_large_path: "user-1/brews/brew-1/photo-1/large.webp",
+      photo_1_thumbnail_path:
+        "user-1/brews/brew-1/photo-1/thumbnail.webp",
+      photo_2_large_path: "user-1/brews/brew-1/photo-2/large.webp",
+      photo_2_thumbnail_path:
+        "user-1/brews/brew-1/photo-2/thumbnail.webp",
+      photo_3_large_path: null,
+      photo_3_thumbnail_path: null,
+    });
+  });
+
+  it("사진이 없으면 여섯 컬럼을 모두 null로 만든다", () => {
+    expect(toBrewPhotoColumns([])).toStrictEqual({
+      photo_1_large_path: null,
+      photo_1_thumbnail_path: null,
+      photo_2_large_path: null,
+      photo_2_thumbnail_path: null,
+      photo_3_large_path: null,
+      photo_3_thumbnail_path: null,
+    });
+  });
+
+  it("사진이 3장을 넘으면 거부한다", () => {
+    const photo = {
+      largePath: "large.webp",
+      thumbnailPath: "thumbnail.webp",
+    };
+
+    expect(() => toBrewPhotoColumns([photo, photo, photo, photo])).toThrow(
+      "기록 사진은 최대 3장까지 저장할 수 있습니다",
+    );
   });
 });
 

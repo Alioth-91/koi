@@ -8,9 +8,20 @@ type Sensory = {
   aftertaste: SensoryScore; // 여운
 };
 
+export type BrewPhoto = {
+  thumbnailPath: string;
+  largePath: string;
+};
+
+export type BrewPhotoView = BrewPhoto & {
+  thumbnailUrl: string;
+  largeUrl: string;
+};
+
 type BrewBase = {
   date: string; // YYYY-MM-DD, 문자열 정렬만으로 날짜순이 됨
   id: string;
+  photos: BrewPhoto[];
   score: number; // 0.5 단위
   sensory: Sensory; // 미입력 축은 0으로 저장한다
   memo?: string;

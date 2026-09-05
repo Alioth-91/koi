@@ -17,6 +17,7 @@ const brews: Brew[] = [
     date: "2026-09-04",
     id: "brew-1",
     method: "V60",
+    photos: [],
     score: 4.5,
     sensory: {
       acidity: 4,
@@ -33,6 +34,7 @@ const brews: Brew[] = [
     date: "2026-09-03",
     id: "brew-2",
     method: "에어로프레스",
+    photos: [],
     score: 4,
     sensory: {
       acidity: 3,
@@ -47,6 +49,7 @@ const brews: Brew[] = [
     cafeName: "프릳츠",
     date: "2026-09-02",
     id: "brew-3",
+    photos: [],
     score: 4,
     sensory: {
       acidity: 3,

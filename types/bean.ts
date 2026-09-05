@@ -1,20 +1,6 @@
-/**
- * 원두
- */
-export type BeanPhoto = {
-  thumbnailPath: string;
-  largePath: string;
-};
-
-export type BeanPhotoView = BeanPhoto & {
-  thumbnailUrl: string;
-  largeUrl: string;
-};
-
 export type Bean = {
   id: string;
   name: string;
-  photos: BeanPhoto[];
   roastery?: string;
   roastedAt?: string; // YYYY-MM-DD. brew의 date와 같은 문자열이다
   weight?: number; // 봉지 용량(g)
