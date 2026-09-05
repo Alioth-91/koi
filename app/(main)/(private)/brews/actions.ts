@@ -8,12 +8,17 @@ import {
   deleteBrewById,
   getBrewById,
   insertBrew,
+  updateBrewPhotos,
   updateBrewById,
 } from "@/libs/db/brews";
 import { createClient } from "@/libs/db/server";
 import { brewSchema, cafeSchema, homeSchema } from "@/libs/schemas/brew";
-import { parseBrewPhotoFormData } from "@/libs/schemas/brew-photo";
-import type { HomeBrew } from "@/types/brew";
+import {
+  parseBrewPhotoFormData,
+  type NewBrewPhoto,
+} from "@/libs/schemas/brew-photo";
+import { removeBrewPhotoPair, uploadBrewPhotoPair } from "@/libs/storage";
+import type { BrewPhoto, HomeBrew } from "@/types/brew";
 
 type BrewActionErrors = Record<string, string[] | undefined>;
 
@@ -48,15 +53,12 @@ export async function createBrew(input: unknown): Promise<BrewActionState> {
     }
 
     let brewInput: unknown = input;
+    let newPhotos: NewBrewPhoto[] = [];
 
     if (input instanceof FormData) {
       const parsedPhotoForm = parseBrewPhotoFormData(input);
-
-      if (parsedPhotoForm.photos.length > 0) {
-        return { errorMessage: "사진 업로드 기능을 준비 중입니다" };
-      }
-
       brewInput = parsedPhotoForm.brewInput;
+      newPhotos = parsedPhotoForm.newPhotos;
     }
 
     const parsed = brewSchema.safeParse(brewInput);
@@ -64,6 +66,8 @@ export async function createBrew(input: unknown): Promise<BrewActionState> {
     if (!parsed.success) {
       return { errors: z.flattenError(parsed.error).fieldErrors };
     }
+
+    let brewId: string;
 
     if (parsed.data.type === "home") {
       const bean = await getBeanById(parsed.data.beanId);
@@ -78,7 +82,7 @@ export async function createBrew(input: unknown): Promise<BrewActionState> {
         };
       }
 
-      await insertBrew(
+      brewId = await insertBrew(
         {
           ...parsed.data,
           beanName: bean.name,
@@ -88,7 +92,40 @@ export async function createBrew(input: unknown): Promise<BrewActionState> {
         data.user.id,
       );
     } else {
-      await insertBrew(parsed.data, data.user.id);
+      brewId = await insertBrew(parsed.data, data.user.id);
+    }
+
+    if (newPhotos.length > 0) {
+      const uploadedPhotos: BrewPhoto[] = [];
+
+      try {
+        for (const photo of newPhotos) {
+          uploadedPhotos.push(
+            await uploadBrewPhotoPair({
+              brewId,
+              large: photo.large,
+              thumbnail: photo.thumbnail,
+              userId: data.user.id,
+            }),
+          );
+        }
+
+        await updateBrewPhotos(brewId, uploadedPhotos);
+      } catch (error) {
+        await Promise.all(
+          uploadedPhotos.map(async (photo) => {
+            try {
+              await removeBrewPhotoPair(photo);
+            } catch (cleanupError) {
+              console.error("기록 사진 임시 파일 정리에 실패했습니다", {
+                cleanupError,
+                photo,
+              });
+            }
+          }),
+        );
+        throw error;
+      }
     }
 
     revalidatePath("/brews", "layout");

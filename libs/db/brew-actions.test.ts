@@ -7,7 +7,10 @@ const mocks = vi.hoisted(() => ({
   getUser: vi.fn(),
   insertBrew: vi.fn(),
   revalidatePath: vi.fn(),
+  updateBrewPhotos: vi.fn(),
   updateBrewById: vi.fn(),
+  removeBrewPhotoPair: vi.fn(),
+  uploadBrewPhotoPair: vi.fn(),
 }));
 
 vi.mock("next/cache", () => ({
@@ -22,7 +25,13 @@ vi.mock("@/libs/db/brews", () => ({
   deleteBrewById: mocks.deleteBrewById,
   getBrewById: mocks.getBrewById,
   insertBrew: mocks.insertBrew,
+  updateBrewPhotos: mocks.updateBrewPhotos,
   updateBrewById: mocks.updateBrewById,
+}));
+
+vi.mock("@/libs/storage", () => ({
+  removeBrewPhotoPair: mocks.removeBrewPhotoPair,
+  uploadBrewPhotoPair: mocks.uploadBrewPhotoPair,
 }));
 
 vi.mock("@/libs/db/server", () => ({
@@ -65,8 +74,14 @@ describe("createBrew", () => {
       price: 18000,
       weight: 200,
     });
-    mocks.insertBrew.mockResolvedValue(undefined);
+    mocks.insertBrew.mockResolvedValue("brew-1");
+    mocks.removeBrewPhotoPair.mockResolvedValue(undefined);
+    mocks.updateBrewPhotos.mockResolvedValue(undefined);
     mocks.updateBrewById.mockResolvedValue(undefined);
+    mocks.uploadBrewPhotoPair.mockResolvedValue({
+      largePath: "user-1/brews/brew-1/photo-1/large.webp",
+      thumbnailPath: "user-1/brews/brew-1/photo-1/thumbnail.webp",
+    });
   });
 
   it("집 기록 저장 시 서버가 읽은 원두 가격과 용량을 스냅샷으로 전달한다", async () => {
@@ -118,7 +133,7 @@ describe("createBrew", () => {
     );
   });
 
-  it("사진이 있는 FormData는 업로드 준비 중 오류를 반환한다", async () => {
+  it("사진이 있는 FormData는 기록 저장 후 사진 경로를 저장한다", async () => {
     const clientId = "6ba7b810-9dad-11d1-80b4-00c04fd430c8";
     const formData = new FormData();
 
@@ -139,10 +154,37 @@ describe("createBrew", () => {
       new File(["large"], "large.webp", { type: "image/webp" }),
     );
 
-    await expect(createBrew(formData)).resolves.toStrictEqual({
-      errorMessage: "사진 업로드 기능을 준비 중입니다",
+    await expect(createBrew(formData)).resolves.toStrictEqual({});
+    expect(mocks.uploadBrewPhotoPair).toHaveBeenCalledWith({
+      brewId: "brew-1",
+      large: expect.any(Blob),
+      thumbnail: expect.any(Blob),
+      userId: "user-1",
     });
-    expect(mocks.insertBrew).not.toHaveBeenCalled();
+    expect(mocks.updateBrewPhotos).toHaveBeenCalledWith("brew-1", [
+      {
+        largePath: "user-1/brews/brew-1/photo-1/large.webp",
+        thumbnailPath: "user-1/brews/brew-1/photo-1/thumbnail.webp",
+      },
+    ]);
+  });
+
+  it("사진 경로 저장에 실패하면 업로드한 사진을 삭제한다", async () => {
+    const formData = new FormData();
+    const clientId = "6ba7b810-9dad-11d1-80b4-00c04fd430c8";
+    formData.set("brew", JSON.stringify({ ...validBrewInput, beanId: "550e8400-e29b-41d4-a716-446655440000" }));
+    formData.set("photos", JSON.stringify([{ clientId, kind: "new" }]));
+    formData.set(`photo:${clientId}:thumbnail`, new File(["thumbnail"], "thumbnail.webp", { type: "image/webp" }));
+    formData.set(`photo:${clientId}:large`, new File(["large"], "large.webp", { type: "image/webp" }));
+    mocks.updateBrewPhotos.mockRejectedValue(new Error("db failure"));
+
+    await expect(createBrew(formData)).resolves.toStrictEqual({
+      errorMessage: "기록을 저장하지 못했습니다. 잠시 후 다시 시도해주세요",
+    });
+    expect(mocks.removeBrewPhotoPair).toHaveBeenCalledWith({
+      largePath: "user-1/brews/brew-1/photo-1/large.webp",
+      thumbnailPath: "user-1/brews/brew-1/photo-1/thumbnail.webp",
+    });
   });
 
   it("집 기록의 원두를 바꾸면 새 원두의 스냅샷을 함께 갱신한다", async () => {
