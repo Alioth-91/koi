@@ -2,12 +2,13 @@ import * as z from "zod";
 
 import {
   toBrew,
+  toBrewPhotoColumns,
   toBrewInsert,
   toBrewUpdate,
   type ResolvedBrewForm,
 } from "@/libs/db/brew-mappers";
 import { createClient } from "@/libs/db/server";
-import type { Brew, HomeBrew } from "@/types/brew";
+import type { Brew, BrewPhoto, HomeBrew } from "@/types/brew";
 import type { Database } from "@/types/supabase";
 
 /*
@@ -39,6 +40,21 @@ export async function insertBrew(
   }
 
   return data.id;
+}
+
+export async function updateBrewPhotos(
+  brewId: string,
+  photos: BrewPhoto[],
+): Promise<void> {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("brews")
+    .update(toBrewPhotoColumns(photos))
+    .eq("id", brewId);
+
+  if (error) {
+    throw new Error("기록 사진을 저장하지 못했습니다", { cause: error });
+  }
 }
 
 /**

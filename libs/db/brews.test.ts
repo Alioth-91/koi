@@ -4,7 +4,7 @@ const mocks = vi.hoisted(() => ({ createClient: vi.fn() }));
 
 vi.mock("@/libs/db/server", () => ({ createClient: mocks.createClient }));
 
-import { insertBrew } from "@/libs/db/brews";
+import { insertBrew, updateBrewPhotos } from "@/libs/db/brews";
 import {
   toBrew,
   toBrewPhotoColumns,
@@ -394,5 +394,31 @@ describe("toBrewUpdate", () => {
       water: 300,
       water_temp: null,
     });
+  });
+});
+
+describe("updateBrewPhotos", () => {
+  it("사진 경로를 올바른 기록에 저장한다", async () => {
+    const eq = vi.fn().mockResolvedValue({ error: null });
+    const update = vi.fn().mockReturnValue({ eq });
+    mocks.createClient.mockResolvedValue({
+      from: vi.fn().mockReturnValue({ update }),
+    });
+
+    await expect(
+      updateBrewPhotos("brew-1", [
+        { largePath: "large.webp", thumbnailPath: "thumbnail.webp" },
+      ]),
+    ).resolves.toBeUndefined();
+
+    expect(update).toHaveBeenCalledWith({
+      photo_1_large_path: "large.webp",
+      photo_1_thumbnail_path: "thumbnail.webp",
+      photo_2_large_path: null,
+      photo_2_thumbnail_path: null,
+      photo_3_large_path: null,
+      photo_3_thumbnail_path: null,
+    });
+    expect(eq).toHaveBeenCalledWith("id", "brew-1");
   });
 });
