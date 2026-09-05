@@ -37,6 +37,20 @@ import {
   updateBrew as updateBrewAction,
 } from "@/app/(main)/(private)/brews/actions";
 
+const validBrewInput = {
+  date: "2026-09-04",
+  score: 4.5,
+  sensory: {
+    acidity: 4,
+    aftertaste: 3,
+    bitterness: 2,
+    body: 3,
+    sweetness: 5,
+  },
+  type: "home" as const,
+  water: 300,
+};
+
 describe("createBrew", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -83,6 +97,52 @@ describe("createBrew", () => {
       }),
       "user-1",
     );
+  });
+
+  it("사진이 없는 FormData도 기존 기록 저장 흐름으로 전달한다", async () => {
+    const formData = new FormData();
+
+    formData.set(
+      "brew",
+      JSON.stringify({
+        ...validBrewInput,
+        beanId: "550e8400-e29b-41d4-a716-446655440000",
+      }),
+    );
+    formData.set("photos", "[]");
+
+    await expect(createBrew(formData)).resolves.toStrictEqual({});
+    expect(mocks.insertBrew).toHaveBeenCalledWith(
+      expect.objectContaining({ type: "home" }),
+      "user-1",
+    );
+  });
+
+  it("사진이 있는 FormData는 업로드 준비 중 오류를 반환한다", async () => {
+    const clientId = "6ba7b810-9dad-11d1-80b4-00c04fd430c8";
+    const formData = new FormData();
+
+    formData.set(
+      "brew",
+      JSON.stringify({
+        ...validBrewInput,
+        beanId: "550e8400-e29b-41d4-a716-446655440000",
+      }),
+    );
+    formData.set("photos", JSON.stringify([{ clientId, kind: "new" }]));
+    formData.set(
+      `photo:${clientId}:thumbnail`,
+      new File(["thumbnail"], "thumbnail.webp", { type: "image/webp" }),
+    );
+    formData.set(
+      `photo:${clientId}:large`,
+      new File(["large"], "large.webp", { type: "image/webp" }),
+    );
+
+    await expect(createBrew(formData)).resolves.toStrictEqual({
+      errorMessage: "사진 업로드 기능을 준비 중입니다",
+    });
+    expect(mocks.insertBrew).not.toHaveBeenCalled();
   });
 
   it("집 기록의 원두를 바꾸면 새 원두의 스냅샷을 함께 갱신한다", async () => {

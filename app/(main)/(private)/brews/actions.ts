@@ -12,6 +12,7 @@ import {
 } from "@/libs/db/brews";
 import { createClient } from "@/libs/db/server";
 import { brewSchema, cafeSchema, homeSchema } from "@/libs/schemas/brew";
+import { parseBrewPhotoFormData } from "@/libs/schemas/brew-photo";
 import type { HomeBrew } from "@/types/brew";
 
 type BrewActionErrors = Record<string, string[] | undefined>;
@@ -46,7 +47,19 @@ export async function createBrew(input: unknown): Promise<BrewActionState> {
       return { errorMessage: "로그인 후 기록을 등록해주세요" };
     }
 
-    const parsed = brewSchema.safeParse(input);
+    let brewInput: unknown = input;
+
+    if (input instanceof FormData) {
+      const parsedPhotoForm = parseBrewPhotoFormData(input);
+
+      if (parsedPhotoForm.photos.length > 0) {
+        return { errorMessage: "사진 업로드 기능을 준비 중입니다" };
+      }
+
+      brewInput = parsedPhotoForm.brewInput;
+    }
+
+    const parsed = brewSchema.safeParse(brewInput);
 
     if (!parsed.success) {
       return { errors: z.flattenError(parsed.error).fieldErrors };
