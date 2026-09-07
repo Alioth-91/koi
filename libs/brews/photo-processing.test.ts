@@ -1,6 +1,12 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { getBrewPhotoSize, isSupportedBrewPhoto } from "@/libs/brews/photo-processing";
+import {
+  getBrewPhotoSize,
+  isSupportedBrewPhoto,
+  processBrewPhoto,
+} from "@/libs/brews/photo-processing";
+
+afterEach(() => vi.unstubAllGlobals());
 
 describe("isSupportedBrewPhoto", () => {
   it.each(["image/jpeg", "image/png", "image/webp"])(
@@ -16,6 +22,40 @@ describe("isSupportedBrewPhoto", () => {
     const file = new File(["photo"], "photo.heic", { type: "image/heic" });
 
     expect(isSupportedBrewPhoto(file)).toBe(false);
+  });
+});
+
+describe("processBrewPhoto", () => {
+  it("지원 파일을 썸네일과 큰 WebP로 변환한다", async () => {
+    const bitmap = { close: vi.fn(), height: 2000, width: 3000 };
+    const thumbnail = new Blob(["thumbnail"], { type: "image/webp" });
+    const large = new Blob(["large"], { type: "image/webp" });
+    const convertToBlob = vi.fn().mockResolvedValueOnce(thumbnail).mockResolvedValueOnce(large);
+
+    vi.stubGlobal("createImageBitmap", vi.fn().mockResolvedValue(bitmap));
+    vi.stubGlobal(
+      "OffscreenCanvas",
+      vi.fn().mockImplementation(function () {
+        return {
+          convertToBlob,
+          getContext: vi.fn().mockReturnValue({ drawImage: vi.fn() }),
+        };
+      }),
+    );
+
+    const result = await processBrewPhoto(new File(["photo"], "photo.jpg", { type: "image/jpeg" }));
+
+    expect(result).toEqual({ large, thumbnail });
+    expect(convertToBlob).toHaveBeenCalledTimes(2);
+    expect(bitmap.close).toHaveBeenCalledOnce();
+  });
+
+  it("지원하지 않는 파일은 변환하지 않고 오류를 반환한다", async () => {
+    const file = new File(["photo"], "photo.heic", { type: "image/heic" });
+
+    await expect(processBrewPhoto(file)).rejects.toThrow(
+      "JPEG·PNG·WebP 사진만 사용할 수 있습니다",
+    );
   });
 });
 
