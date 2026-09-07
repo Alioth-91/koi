@@ -1,3 +1,5 @@
+import type { NewBrewPhoto } from "@/libs/schemas/brew-photo";
+
 export function isSupportedBrewPhoto(file: File): boolean {
   return ["image/jpeg", "image/png", "image/webp"].includes(file.type);
 }
@@ -48,6 +50,24 @@ export async function processBrewPhoto(
   } finally {
     bitmap.close();
   }
+}
+
+/**
+ * 사용자가 4장 이상의 사진을 업로드 시 거절 메시지를 출력한다.
+ */
+export async function processBrewPhotoFiles(
+  files: File[],
+): Promise<NewBrewPhoto[]> {
+  if (files.length > 3) {
+    throw new Error("기록 사진은 최대 3장까지 추가할 수 있습니다");
+  }
+
+  return Promise.all(
+    files.map(async (file) => ({
+      clientId: crypto.randomUUID(),
+      ...(await processBrewPhoto(file)),
+    })),
+  );
 }
 
 export function getBrewPhotoSize(

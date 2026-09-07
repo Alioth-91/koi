@@ -4,6 +4,7 @@ import {
   getBrewPhotoSize,
   isSupportedBrewPhoto,
   processBrewPhoto,
+  processBrewPhotoFiles,
 } from "@/libs/brews/photo-processing";
 
 afterEach(() => vi.unstubAllGlobals());
@@ -30,7 +31,10 @@ describe("processBrewPhoto", () => {
     const bitmap = { close: vi.fn(), height: 2000, width: 3000 };
     const thumbnail = new Blob(["thumbnail"], { type: "image/webp" });
     const large = new Blob(["large"], { type: "image/webp" });
-    const convertToBlob = vi.fn().mockResolvedValueOnce(thumbnail).mockResolvedValueOnce(large);
+    const convertToBlob = vi
+      .fn()
+      .mockResolvedValueOnce(thumbnail)
+      .mockResolvedValueOnce(large);
 
     vi.stubGlobal("createImageBitmap", vi.fn().mockResolvedValue(bitmap));
     vi.stubGlobal(
@@ -43,7 +47,9 @@ describe("processBrewPhoto", () => {
       }),
     );
 
-    const result = await processBrewPhoto(new File(["photo"], "photo.jpg", { type: "image/jpeg" }));
+    const result = await processBrewPhoto(
+      new File(["photo"], "photo.jpg", { type: "image/jpeg" }),
+    );
 
     expect(result).toEqual({ large, thumbnail });
     expect(convertToBlob).toHaveBeenCalledTimes(2);
@@ -55,6 +61,17 @@ describe("processBrewPhoto", () => {
 
     await expect(processBrewPhoto(file)).rejects.toThrow(
       "JPEG·PNG·WebP 사진만 사용할 수 있습니다",
+    );
+  });
+
+  it("사진을 3장 초과해서 처리하지 않는다", async () => {
+    const files = Array.from(
+      { length: 4 },
+      () => new File(["photo"], "photo.jpg"),
+    );
+
+    await expect(processBrewPhotoFiles(files)).rejects.toThrow(
+      "기록 사진은 최대 3장까지 추가할 수 있습니다",
     );
   });
 });
