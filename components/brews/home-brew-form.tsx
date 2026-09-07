@@ -3,11 +3,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import * as z from "zod";
 
 import { createBrew, updateBrew } from "@/app/(main)/(private)/brews/actions";
+import BrewPhotoField from "@/components/brews/brew-photo-field";
 import FieldCard from "@/components/brews/field-card";
 import MemoField from "@/components/brews/memo-field";
 import ScoreField from "@/components/brews/score-field";
@@ -15,6 +16,8 @@ import SensoryFields from "@/components/brews/sensory-fields";
 import TypeSegment from "@/components/brews/type-segment";
 import { BREW_NEW_FORM_ID } from "@/libs/constants/forms";
 import { homeSchema } from "@/libs/schemas/brew";
+import { toBrewPhotoFormData } from "@/libs/brews/photo-form-data";
+import type { NewBrewPhoto } from "@/libs/schemas/brew-photo";
 import { today } from "@/libs/utils";
 import type { Bean } from "@/types/bean";
 import type { Brew } from "@/types/brew";
@@ -59,6 +62,7 @@ export default function HomeBrewForm({
   onTypeChange,
 }: Props) {
   const router = useRouter();
+  const [photos, setPhotos] = useState<NewBrewPhoto[]>([]);
 
   const {
     clearErrors,
@@ -106,7 +110,7 @@ export default function HomeBrewForm({
 
     const result = brew
       ? await updateBrew({ brewId: brew.id, ...values })
-      : await createBrew(values);
+      : await createBrew(toBrewPhotoFormData(values, photos));
 
     for (const field of HOME_FIELDS) {
       const message = result.errors?.[field]?.[0];
@@ -268,6 +272,15 @@ export default function HomeBrewForm({
               >
                 원두 등록하기
               </Link>
+            </div>
+          )}
+
+          {!isEditing && (
+            <div className="mt-6">
+              <BrewPhotoField
+                disabled={isSubmitting}
+                onPhotosChange={setPhotos}
+              />
             </div>
           )}
 
