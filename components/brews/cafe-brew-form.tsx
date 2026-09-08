@@ -7,6 +7,7 @@ import { useForm, useWatch } from "react-hook-form";
 import * as z from "zod";
 
 import { createBrew, updateBrew } from "@/app/(main)/(private)/brews/actions";
+import BrewPhotoField from "@/components/brews/brew-photo-field";
 import CafeMap from "@/components/brews/cafe-map";
 import CafeSearch, { type PickedCafe } from "@/components/brews/cafe-search";
 import FieldCard from "@/components/brews/field-card";
@@ -14,9 +15,11 @@ import MemoField from "@/components/brews/memo-field";
 import ScoreField from "@/components/brews/score-field";
 import SensoryFields from "@/components/brews/sensory-fields";
 import TypeSegment from "@/components/brews/type-segment";
+import { toBrewPhotoFormData } from "@/libs/brews/photo-form-data";
 import { BREW_NEW_FORM_ID } from "@/libs/constants/forms";
-import { today } from "@/libs/utils";
 import { cafeSchema } from "@/libs/schemas/brew";
+import type { NewBrewPhoto } from "@/libs/schemas/brew-photo";
+import { today } from "@/libs/utils";
 import type { Brew, CafeBrew } from "@/types/brew";
 
 const CAFE_FIELDS = [
@@ -53,6 +56,7 @@ export default function CafeBrewForm({
   onTypeChange,
 }: Props) {
   const router = useRouter();
+  const [photos, setPhotos] = useState<NewBrewPhoto[]>([]);
   const [picked, setPicked] = useState<PickedCafe | null>(() =>
     brew?.location
       ? {
@@ -107,7 +111,7 @@ export default function CafeBrewForm({
 
     const result = brew
       ? await updateBrew({ brewId: brew.id, ...values })
-      : await createBrew(values);
+      : await createBrew(toBrewPhotoFormData(values, photos));
 
     for (const field of CAFE_FIELDS) {
       const message = result.errors?.[field]?.[0];
@@ -235,6 +239,15 @@ export default function CafeBrewForm({
               {picked?.address ?? "검색해서 카페를 고르세요"}
             </p>
           </div>
+
+          {!isEditing && (
+            <div className="mt-6">
+              <BrewPhotoField
+                disabled={isSubmitting}
+                onPhotosChange={setPhotos}
+              />
+            </div>
+          )}
 
           <div className="mt-6">
             <MemoField placeholder="다음에 참고할 것" {...register("memo")} />

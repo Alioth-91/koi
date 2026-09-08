@@ -47,8 +47,10 @@ export default function BrewPhotoField({ disabled, onPhotosChange }: Props) {
   return (
     <div className="flex flex-col gap-2">
       <span className="text-[11px] text-muted-foreground">사진 (최대 3장)</span>
-      <label className="flex aspect-[3/1] cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-border-foreground text-muted-foreground transition-colors hover:border-primary hover:text-primary">
-        <span aria-hidden className="text-2xl leading-none">+</span>
+      <label className="flex aspect-3/1 cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-border-foreground text-muted-foreground transition-colors hover:border-primary hover:text-primary">
+        <span aria-hidden className="text-2xl leading-none">
+          +
+        </span>
         <span className="mt-2 text-xs">사진 선택</span>
         <input
           accept="image/jpeg,image/png,image/webp"
